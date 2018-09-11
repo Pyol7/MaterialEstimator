@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_projects"
+            android:icon="@drawable/ic_location_city_white_24dp"
+            android:title="@string/nav_projects" />
+        <item
+            android:id="@+id/nav_material_lists"
+            android:icon="@drawable/ic_assignment_white_24dp"
+            android:title="@string/nav_material_lists" />
+        <item
+            android:id="@+id/nav_trash"
+            android:icon="@drawable/ic_delete_white_24dp"
+            android:title="@string/nav_trash" />
+        <item
+            android:id="@+id/nav_settings"
+            android:icon="@drawable/ic_settings_white_24dp"
+            android:title="@string/nav_settings" />
+    </group>
+</menu>

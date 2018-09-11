@@ -1,0 +1,62 @@
+<resources>
+    <string name="app_name">Material Estimator</string>
+
+    <!--SharedPreferences File names-->
+    <string name="default_material_lists">Default Material Lists</string>
+    <string name="user_material_lists">User Material Lists</string>
+    <string name="projects_list">Projects List</string>
+
+    <!--Default Material Lists Names-->
+    <string name="default_material_list">Default Material List</string>
+    <string name="default_drywall_ceiling_material_list">Drywall Ceiling Material List</string>
+    <string name="default_drywall_partition_material_list">Drywall Partition Material List</string>
+    <string name="default_dropped_ceiling_material_list">Dropped Ceiling Material List</string>
+
+    <!--Sample Project-->
+    <string name="sample_project">Levy\'s Residence</string>
+
+    <!--Menu Items-->
+    <string name="action_add">Add</string>
+    <string name="action_save">Save</string>
+    <string name="action_material_lists">Material Lists</string>
+
+    <!--Nav Drawer items-->
+    <string name="nav_projects">Projects</string>
+    <string name="nav_material_lists">Manage Material Lists</string>
+    <string name="nav_trash">Trash</string>
+    <string name="nav_settings">Settings</string>
+
+    <!--ProjectsFragment-->
+    <string name="projects_empty_view_title">Add a project</string>
+    <string name="projects_empty_view_message">Click the + button to create your first project</string>
+
+    <!--ProjectFragment-->
+    <string name="project_empty_view_title">Add project items</string>
+    <string name="project_empty_view_message1">Click the + button to begin</string>
+    <string name="project_empty_view_message2">
+        Project items are the things that make up your project,
+        eg. Living Room Ceiling, Drywall Partition etc.</string>
+
+    <!--AddProjectDialog-->
+    <string name="add_project_dialog_title">Create New Project</string>
+
+    <!--ProjectItemCreatorFragment-->
+    <string name="projectItemCreator_title">Project Item Creator</string>
+    <string name="projectItemNameTV_hint">Untitled</string>
+    <string name="projectItemListNameTV_hint">Material List</string>
+    <string name="lengthET_hint">Length</string>
+    <string name="widthET_hint">Width</string>
+    <string name="calcBTN_text">Calculate</string>
+    <string name="add_name_dialog_title">Add a name</string>
+    <string name="select_list_dialog_title">Select a list</string>
+
+    <!--MaterialListsFragment-->
+    <string name="material_lists_title">Material Lists</string>
+
+    <!--units-->
+    <string name="min_unit">in</string>
+    <string name="max_feet">ft</string>
+
+    <string name="title">Title</string>
+
+</resources>
