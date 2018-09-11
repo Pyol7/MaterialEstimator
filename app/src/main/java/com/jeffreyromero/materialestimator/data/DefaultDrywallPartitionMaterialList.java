@@ -18,12 +18,12 @@ public class DefaultDrywallPartitionMaterialList {
 
     public static MaterialList getList(Context context) {
         ArrayList<Material> l = new ArrayList<>();
-        l.add(new Panel("Regular Boards", 7400, 96, 48));
-        l.add(new Stud("Metal Studs", 1540, 2.5, 108));
-        l.add(new Track("Metal Tracks", 1950, 2.5, 120));
-        l.add(new DrywallScrew("Drywall Screws", 20));
-        l.add(new FramingScrew("Framing Screws", 14));
-        l.add(new JointCompoundAllPurpose("Joint Compound All Purpose", 13000));
+        l.add(new Panel("Regular Boards", 74.00, 96, 48));
+        l.add(new Stud("Metal Studs", 15.40, 2.5, 108));
+        l.add(new Track("Metal Tracks", 19.50, 2.5, 120));
+        l.add(new DrywallScrew("Drywall Screws", 0.20));
+        l.add(new FramingScrew("Framing Screws", 0.14));
+        l.add(new JointCompoundAllPurpose("Joint Compound All Purpose", 130.00));
 
         return new MaterialList(l, context.getString(R.string.default_drywall_partition_material_list));
     }

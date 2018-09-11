@@ -1,4 +1,4 @@
-package com.jeffreyromero.materialestimator;
+package com.jeffreyromero.materialestimator.utilities;
 
 import android.content.Context;
 import android.support.annotation.Nullable;

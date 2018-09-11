@@ -4,8 +4,8 @@ import com.jeffreyromero.materialestimator.models.Material;
 
 public class CeilingTile extends Material {
 
-    public CeilingTile(String name, int price, double length, double width) {
-        super("CeilingTile", name, price, length, width);
+    public CeilingTile(String name, double unitPrice, double length, double width) {
+        super("CeilingTile", name, unitPrice, length, width);
     }
 
     @Override

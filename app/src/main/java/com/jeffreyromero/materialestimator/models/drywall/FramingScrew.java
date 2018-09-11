@@ -4,7 +4,7 @@ import com.jeffreyromero.materialestimator.models.Material;
 
 public class FramingScrew extends Material {
 
-    public FramingScrew(String name, int price) {
+    public FramingScrew(String name, double price) {
         super("FramingScrew", name, price);
     }
 

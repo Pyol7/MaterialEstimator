@@ -6,7 +6,7 @@ import static java.lang.Math.sqrt;
 
 public class WallAngle extends Material {
 
-    public WallAngle(String name, int price, double length) {
+    public WallAngle(String name, double price, double length) {
         super("WallAngle", name, price, length);
     }
 

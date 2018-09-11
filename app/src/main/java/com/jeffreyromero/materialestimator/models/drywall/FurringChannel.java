@@ -6,7 +6,7 @@ import static java.lang.Math.sqrt;
 
 public class FurringChannel extends Material {
 
-    public FurringChannel(String name, int price, double length) {
+    public FurringChannel(String name, double price, double length) {
         super("FurringChannel", name, price, length);
     }
 

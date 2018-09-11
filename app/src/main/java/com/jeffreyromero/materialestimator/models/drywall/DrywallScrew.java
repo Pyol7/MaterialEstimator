@@ -5,7 +5,7 @@ import static java.lang.Math.sqrt;
 
 public class DrywallScrew extends Material {
 
-    public DrywallScrew(String name, int price) {
+    public DrywallScrew(String name, double price) {
         super("DrywallScrew", name, price);
     }
 

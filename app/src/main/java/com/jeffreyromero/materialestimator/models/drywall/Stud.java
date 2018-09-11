@@ -5,7 +5,7 @@ import static java.lang.Math.sqrt;
 
 public class Stud extends Material {
 
-    public Stud(String name, int price, double length, double width) {
+    public Stud(String name, double price, double length, double width) {
         super("Stud", name, price, length, width);
     }
 

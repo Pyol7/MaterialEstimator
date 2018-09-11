@@ -4,8 +4,8 @@ import com.jeffreyromero.materialestimator.models.Material;
 
 public class CrossTeeShort extends Material {
 
-    public CrossTeeShort(String name, int price, double length) {
-        super("CrossTeeShort", name, price, length);
+    public CrossTeeShort(String name, double unitPrice, double length) {
+        super("CrossTeeShort", name, unitPrice, length);
     }
 
     @Override

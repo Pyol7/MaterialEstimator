@@ -4,8 +4,8 @@ import com.jeffreyromero.materialestimator.models.Material;
 
 public class MainTee extends Material {
 
-    public MainTee(String name, int price, double length) {
-        super("MainTee", name, price, length);
+    public MainTee(String name, double unitPrice, double length) {
+        super("MainTee", name, unitPrice, length);
     }
 
     @Override

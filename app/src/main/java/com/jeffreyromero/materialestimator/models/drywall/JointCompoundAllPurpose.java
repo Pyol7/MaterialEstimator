@@ -4,7 +4,7 @@ import com.jeffreyromero.materialestimator.models.Material;
 
 public class JointCompoundAllPurpose extends Material {
 
-    public JointCompoundAllPurpose(String name, int price) {
+    public JointCompoundAllPurpose(String name, double price) {
         super("JointCompoundAllPurpose", name, price);
     }
 

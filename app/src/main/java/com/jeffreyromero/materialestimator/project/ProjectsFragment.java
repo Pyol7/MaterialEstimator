@@ -13,7 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.jeffreyromero.materialestimator.CustomRecyclerView;
+import com.jeffreyromero.materialestimator.utilities.CustomRecyclerView;
 import com.jeffreyromero.materialestimator.R;
 import com.jeffreyromero.materialestimator.data.ProjectsDataSource;
 import com.jeffreyromero.materialestimator.models.Project;

@@ -5,7 +5,7 @@ import static java.lang.Math.sqrt;
 
 public class CChannel extends Material {
 
-    public CChannel(String name, int price, double length) {
+    public CChannel(String name, double price, double length) {
         super("CChannel", name, price, length);
     }
 

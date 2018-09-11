@@ -17,11 +17,11 @@ public class DefaultDroppedCeilingMaterialList {
 
     public static MaterialList getList(Context context) {
         ArrayList<Material> l = new ArrayList<>();
-        l.add(new CeilingTile("Ceiling Tiles 24x24", 1100, 24, 24));
-        l.add(new MainTee("Main Tees", 2253, 144));
-        l.add(new CrossTeeLong("4ft Cross Tees", 730, 48));
-        l.add(new CrossTeeShort("2ft Cross Tees", 404, 24));
-        l.add(new WallAngle("Wall Angles", 1374, 120));
+        l.add(new CeilingTile("Ceiling Tiles 24x24", 11.00, 24, 24));
+        l.add(new MainTee("Main Tees", 22.53, 144));
+        l.add(new CrossTeeLong("4ft Cross Tees", 7.30, 48));
+        l.add(new CrossTeeShort("2ft Cross Tees", 4.04, 24));
+        l.add(new WallAngle("Wall Angles", 13.74, 120));
 
         return new MaterialList(l, context.getString(R.string.default_dropped_ceiling_material_list));
     }

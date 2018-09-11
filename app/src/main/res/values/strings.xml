@@ -49,6 +49,9 @@
     <string name="calcBTN_text">Calculate</string>
     <string name="add_name_dialog_title">Add a name</string>
     <string name="select_list_dialog_title">Select a list</string>
+    <string name="total_label">Total</string>
+    <string name="content_description">Press to calculate material quantiry and cost.</string>
+    <string name="quantityUnitPrice_output">%.2fpcs @ %.2f</string>
 
     <!--MaterialListsFragment-->
     <string name="material_lists_title">Material Lists</string>

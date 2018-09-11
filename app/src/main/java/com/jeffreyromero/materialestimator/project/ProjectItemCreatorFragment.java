@@ -2,6 +2,7 @@ package com.jeffreyromero.materialestimator.project;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -29,7 +30,9 @@ import com.jeffreyromero.materialestimator.models.Material;
 import com.jeffreyromero.materialestimator.models.MaterialList;
 import com.jeffreyromero.materialestimator.models.ProjectItem;
 
+import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Locale;
 
 /**
  * Displays the ProjectItem creator.
@@ -49,11 +52,13 @@ public class ProjectItemCreatorFragment extends Fragment implements
     private int selectedListPosition;
     private TextView projectItemNameTV;
     private TextView projectItemListNameTV;
+    private ProjectItem projectItem;
     private String projectItemName;
+    private TextView lengthET;
+    private TextView widthET;
     private Context context;
     private double length;
     private double width;
-    private View view;
 
     public ProjectItemCreatorFragment() {
         // Required empty public constructor
@@ -92,8 +97,9 @@ public class ProjectItemCreatorFragment extends Fragment implements
         activitySP = getActivity().getPreferences(Context.MODE_PRIVATE);
         //Use the stored position or set zero.
         selectedListPosition = activitySP.getInt(SELECTED_LIST_POSITION, 0);
-        //Use the stored item name or the default.
-        projectItemName = activitySP.getString(PROJECT_ITEM_NAME, PROJECT_ITEM_NAME);
+        //Create a ProjectItem using the stored item name or the default name.
+        projectItem = new ProjectItem(activitySP.getString(PROJECT_ITEM_NAME, PROJECT_ITEM_NAME));
+        projectItemName = projectItem.getName();
         //Instantiate the adapter
         adapter = new ProjectItemAdapter(userMaterialLists.get(selectedListPosition));
     }
@@ -104,7 +110,7 @@ public class ProjectItemCreatorFragment extends Fragment implements
         //Show options menu.
         setHasOptionsMenu(true);
         // Inflate the layout for this fragment
-        view = inflater.inflate(
+        final View view = inflater.inflate(
                 R.layout.project_item_creator_fragment,
                 container,
                 false
@@ -125,27 +131,73 @@ public class ProjectItemCreatorFragment extends Fragment implements
         projectItemListNameTV = view.findViewById(R.id.projectItemListNameTV);
         projectItemListNameTV.setText("( " + adapter.getSelectedList() + " )");
 
+        //Set total cost.
+        TextView totalTV = view.findViewById(R.id.totalTV);
+        totalTV.setText(String.format(
+                Locale.US,
+                "$%.2f",
+                projectItem.getTotalPrice()));
+
         //Calculate quantities based on user input.
         Button btn = view.findViewById(R.id.calcBTN);
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //Get user inputs
-                EditText lengthET = view.findViewById(R.id.lengthTV);
-                EditText widthET = view.findViewById(R.id.widthTV);
-                length = Double.valueOf(lengthET.getText().toString());
-                width = Double.valueOf(widthET.getText().toString());
-                //Calculate quantities.
-                adapter.calculateQuantities(length, width);
-                //Close keyboard and clear focus from inputs.
-                InputMethodManager imm = (InputMethodManager) getActivity()
-                        .getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-                lengthET.clearFocus();
-                widthET.clearFocus();
+                //Get user inputs.
+                lengthET = view.findViewById(R.id.lengthTV);
+                widthET = view.findViewById(R.id.widthTV);
+                int lengthSize = lengthET.getText().toString().trim().length();
+                int widthSize = widthET.getText().toString().trim().length();
+                if (lengthSize != 0 && widthSize != 0){
+
+                    calculateMaterialAndCreateProjectItem(view);
+
+                } else {
+                    //todo - change to snack bar.
+                    Toast.makeText(context, "Enter a length and width", Toast.LENGTH_LONG).show();
+                }
+
             }
         });
         return view;
+    }
+
+    private void calculateMaterialAndCreateProjectItem(View view){
+        //Ensure that a project item has a name.
+        TextView projectItemNameTV = view.findViewById(R.id.projectItemNameTV);
+        String projectItemName = projectItemNameTV.getText().toString();
+        if (!projectItemName.equals(PROJECT_ITEM_NAME)) {
+
+            length = Double.valueOf(lengthET.getText().toString());
+            width = Double.valueOf(widthET.getText().toString());
+
+            //Build the project item.
+            projectItem.setLength(length);
+            projectItem.setWidth(width);
+            projectItem.setMaterialList(adapter.getSelectedList());
+
+            //Calculate quantities.
+            adapter.calculateQuantities(length, width);
+
+            //Calculate and set total cost.
+            projectItem.calcTotalPrice();
+            TextView totalTV = view.findViewById(R.id.totalTV);
+            totalTV.setText(String.format(
+                    Locale.US,
+                    "$%.2f",
+                    projectItem.getTotalPrice()));
+
+            //Close keyboard and clear focus from inputs.
+            InputMethodManager imm = (InputMethodManager) getActivity()
+                    .getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+            lengthET.clearFocus();
+            widthET.clearFocus();
+
+        } else {
+            //todo - change to snack bar.
+            Toast.makeText(context, "Add a name to this project item", Toast.LENGTH_LONG).show();
+        }
     }
 
     private class AddNameDialog implements View.OnClickListener {
@@ -215,34 +267,15 @@ public class ProjectItemCreatorFragment extends Fragment implements
                 return true;
 
             case R.id.action_save:
-                //Create new project item.
-                createAndSendProjectItem();
+                //Pass the created ProjectItem to the hosting fragment.
+                mListener.onProjectItemCreated(projectItem);
+                //Reset the projectItem name in activity SP.
+                activitySP.edit().putString(PROJECT_ITEM_NAME, PROJECT_ITEM_NAME).apply();
+                //Redirect back to hosting fragment.
+                getFragmentManager().popBackStackImmediate();
                 return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    private void createAndSendProjectItem() {
-        //Ensure that a project item has a name.
-        TextView projectItemNameTV = view.findViewById(R.id.projectItemNameTV);
-        String projectItemName = projectItemNameTV.getText().toString();
-        if (!projectItemName.equals(PROJECT_ITEM_NAME)) {
-            //Build the project item.
-            ProjectItem projectItem = new ProjectItem(
-                    projectItemName,
-                    length,
-                    width,
-                    adapter.getSelectedList()
-            );
-            //Pass the created ProjectItem to the hosting fragment.
-            mListener.onProjectItemCreated(projectItem);
-            //Reset the projectItem name in activity SP.
-            activitySP.edit().putString(PROJECT_ITEM_NAME, PROJECT_ITEM_NAME).apply();
-            //Redirect back to hosting fragment.
-            getFragmentManager().popBackStackImmediate();
-        } else {
-            Toast.makeText(context, "Add a name before saving", Toast.LENGTH_LONG).show();
-        }
     }
 
     @Override
@@ -296,7 +329,7 @@ public class ProjectItemCreatorFragment extends Fragment implements
             // Get the inflater
             LayoutInflater inflater = LayoutInflater.from(context);
             // Inflate the item view layout
-            View itemView = inflater.inflate(R.layout.list_item_textview_textview, parent, false);
+            View itemView = inflater.inflate(R.layout.project_item_list_item, parent, false);
             return new ItemViewHolder(itemView);
         }
 
@@ -304,18 +337,34 @@ public class ProjectItemCreatorFragment extends Fragment implements
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
             Material material = selectedList.get(position);
             ItemViewHolder viewHolder = (ItemViewHolder) holder;
-            viewHolder.columnLeftTV.setText(material.toString());
-            viewHolder.columnRightTV.setText(String.valueOf(material.getQuantity()));
+            if (position %2 == 0){
+                viewHolder.itemView.setBackgroundColor(getResources().getColor(R.color.lightGray));
+            } else {
+                viewHolder.itemView.setBackgroundColor(getResources().getColor(R.color.white));
+            }
+            viewHolder.nameTV.setText(material.toString());
+            String qup = String.format(
+                    Locale.US,
+                    "%.0fpcs  @  $%.2f",
+                    material.getQuantity(),
+                    material.getUnitPrice());
+            viewHolder.quantityUnitPriceTV.setText(qup);
+            viewHolder.priceTV.setText(String.format(
+                    Locale.US,
+                    "$%.2f",
+                    material.getPrice()));
         }
 
         private class ItemViewHolder extends RecyclerView.ViewHolder {
-            TextView columnLeftTV;
-            TextView columnRightTV;
+            TextView nameTV;
+            TextView quantityUnitPriceTV;
+            TextView priceTV;
 
             ItemViewHolder(final View itemView) {
                 super(itemView);
-                columnLeftTV = itemView.findViewById(R.id.columnLeftTV);
-                columnRightTV = itemView.findViewById(R.id.columnRightTV);
+                nameTV = itemView.findViewById(R.id.nameTV);
+                quantityUnitPriceTV = itemView.findViewById(R.id.quantityUnitPriceTV);
+                priceTV = itemView.findViewById(R.id.priceTV);
             }
         }
     }

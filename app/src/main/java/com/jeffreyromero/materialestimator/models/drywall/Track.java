@@ -5,7 +5,7 @@ import static java.lang.Math.sqrt;
 
 public class Track extends Material {
 
-    public Track(String name, int price, double length, double width) {
+    public Track(String name, double price, double length, double width) {
         super("Track", name, price, length, width);
     }
 

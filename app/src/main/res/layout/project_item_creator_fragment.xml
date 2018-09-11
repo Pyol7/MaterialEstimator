@@ -75,26 +75,11 @@
         android:id="@+id/recyclerView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="12dp"
         android:elevation="0dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/divider" />
-
-    <View
-        android:id="@+id/divider"
-        android:layout_width="0dp"
-        android:layout_height="2dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
-        android:background="?android:attr/listDivider"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/projectItemListNameTV" />
 
@@ -105,9 +90,9 @@
         android:layout_gravity="center_vertical|center"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="16dp"
         android:clickable="true"
-        android:focusable="auto"
+        android:focusable="true"
         android:gravity="center"
         android:selectAllOnFocus="true"
         android:textSize="18sp"
@@ -140,10 +125,33 @@
         android:layout_marginStart="8dp"
         android:adjustViewBounds="false"
         android:background="@android:color/transparent"
+        android:contentDescription="@string/content_description"
         android:cropToPadding="false"
         android:src="@drawable/ic_edit_white_24dp"
         app:layout_constraintBottom_toBottomOf="@+id/projectItemNameTV"
         app:layout_constraintStart_toEndOf="@+id/projectItemNameTV" />
+
+    <TextView
+        android:id="@+id/totalLabelTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:text="@string/total_label"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@+id/totalTV"
+        app:layout_constraintEnd_toStartOf="@+id/totalTV" />
+
+    <TextView
+        android:id="@+id/totalTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="24dp"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="@+id/recyclerView"
+        app:layout_constraintTop_toBottomOf="@+id/recyclerView"
+        tools:text="$12,000.00" />
 
 
     <!--Input Group End-->

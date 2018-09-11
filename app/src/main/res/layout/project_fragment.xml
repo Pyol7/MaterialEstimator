@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.jeffreyromero.materialestimator.CustomRecyclerView
+    <com.jeffreyromero.materialestimator.utilities.CustomRecyclerView
         android:id="@+id/customRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

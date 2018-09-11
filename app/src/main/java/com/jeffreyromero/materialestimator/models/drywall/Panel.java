@@ -6,7 +6,7 @@ import static java.lang.Math.sqrt;
 
 public class Panel extends Material {
 
-    public Panel(String name, int price, double length, double width) {
+    public Panel(String name, double price, double length, double width) {
         super("Panel", name, price, length, width);
     }
 

@@ -4,7 +4,7 @@ import com.jeffreyromero.materialestimator.models.Material;
 
 public class JointCompoundSettingType extends Material {
 
-    public JointCompoundSettingType(String name, int price) {
+    public JointCompoundSettingType(String name, double price) {
         super("JointCompoundSettingType", name, price);
     }
 
