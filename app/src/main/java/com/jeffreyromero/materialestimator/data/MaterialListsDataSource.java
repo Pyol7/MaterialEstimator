@@ -33,6 +33,16 @@ public class MaterialListsDataSource implements DataSource<MaterialList> {
         );
     }
 
+    public void registerOnChangeListener(
+            SharedPreferences.OnSharedPreferenceChangeListener mListener){
+        spInstance.registerOnSharedPreferenceChangeListener(mListener);
+    }
+
+    public void unRegisterOnChangeListener(
+            SharedPreferences.OnSharedPreferenceChangeListener mListener){
+        spInstance.unregisterOnSharedPreferenceChangeListener(mListener);
+    }
+
     /**
      * Store a MaterialList using it's name property as key.
      * If the list exists it would overwrite it.

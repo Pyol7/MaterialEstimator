@@ -1,69 +1,104 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/contentCL"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.jeffreyromero.materialestimator.utilities.CustomRecyclerView
-        android:id="@+id/customRecyclerView"
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layoutManager="android.support.v7.widget.LinearLayoutManager"
+        android:layout_marginBottom="24dp"
+        android:layout_marginTop="8dp"
+        android:scrollbars="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/headerCL" />
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/headerCL"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="16dp"
-        app:layoutManager="LinearLayoutManager"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <LinearLayout
-        android:id="@+id/empty_view"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="32dp"
-        android:layout_marginStart="32dp"
         android:layout_marginTop="8dp"
-        android:orientation="vertical"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
+        <TextView
+            android:id="@+id/dateCreatedTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:textSize="14sp"
+            app:layout_constraintBottom_toBottomOf="@+id/dateCreatedLableTV"
+            app:layout_constraintStart_toEndOf="@+id/dateCreatedLableTV"
+            tools:text="12th Aug 2018" />
+
+        <TextView
+            android:id="@+id/dateCreatedLableTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/project_date_created_text"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="@+id/locationLabelTV"
+            app:layout_constraintTop_toBottomOf="@+id/locationLabelTV" />
+
         <ImageView
-            android:id="@+id/empty_view_image"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginBottom="16dp"
-            app:srcCompat="@drawable/ic_format_list_bulleted_gray_96dp" />
+            android:id="@+id/imageView2"
+            android:layout_width="82dp"
+            android:layout_height="71dp"
+            android:layout_marginStart="2dp"
+            android:layout_marginTop="8dp"
+            android:adjustViewBounds="false"
+            android:cropToPadding="false"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_location_city_gray_96dp" />
 
         <TextView
-            android:id="@+id/empty_view_title"
+            android:id="@+id/clientLabelTV"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginBottom="8dp"
-            android:text="@string/project_empty_view_title"
-            android:textSize="18sp" />
+            android:layout_marginStart="8dp"
+            android:text="Client:"
+            android:textStyle="bold"
+            app:layout_constraintStart_toEndOf="@+id/imageView2"
+            app:layout_constraintTop_toTopOf="@+id/imageView2" />
 
         <TextView
-            android:id="@+id/empty_view_message1"
+            android:id="@+id/clientTV"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginBottom="8dp"
-            android:gravity="center_horizontal"
-            android:text="@string/project_empty_view_message1"
-            android:textSize="16sp" />
+            android:layout_marginStart="8dp"
+            app:layout_constraintStart_toEndOf="@+id/clientLabelTV"
+            app:layout_constraintTop_toTopOf="@+id/clientLabelTV"
+            tools:text="John Smith" />
 
         <TextView
-            android:id="@+id/empty_view_message2"
+            android:id="@+id/locationLabelTV"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="center_horizontal"
-            android:text="@string/project_empty_view_message2" />
-    </LinearLayout>
+            android:layout_marginTop="4dp"
+            android:text="Location:"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="@+id/clientLabelTV"
+            app:layout_constraintTop_toBottomOf="@+id/clientLabelTV" />
+
+        <TextView
+            android:id="@+id/locationTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            app:layout_constraintStart_toEndOf="@+id/locationLabelTV"
+            app:layout_constraintTop_toTopOf="@+id/locationLabelTV"
+            tools:text="Westmoorings" />
+
+    </android.support.constraint.ConstraintLayout>
 
 </android.support.constraint.ConstraintLayout>

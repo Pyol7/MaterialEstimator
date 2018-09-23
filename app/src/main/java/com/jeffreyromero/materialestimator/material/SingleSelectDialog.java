@@ -31,8 +31,7 @@ public class SingleSelectDialog extends DialogFragment {
     private String title;
 
     /**
-     * Displays a dialog with a list of option to select from.
-     * Only one of which can be selected.
+     * Displays a dialog with a list of option to select one from.
      *
      * @param title <String> The title of the dialog.
      * @param itemList Set<String> An array of items.
@@ -86,6 +85,7 @@ public class SingleSelectDialog extends DialogFragment {
         RecyclerView rv = dialogView.findViewById(R.id.recyclerView);
         adapter = new Adapter();
         rv.setAdapter(adapter);
+        rv.setHasFixedSize(true);
         rv.setLayoutManager(new LinearLayoutManager(getActivity()));
 
         //Build dialog
@@ -143,7 +143,8 @@ public class SingleSelectDialog extends DialogFragment {
             ItemViewHolder viewHolder = (ItemViewHolder) holder;
             if (position == selectedPosition){
                 viewHolder.radioBTN.setChecked(true);
-            } else {
+            }
+            if (position != selectedPosition){
                 viewHolder.radioBTN.setChecked(false);
             }
             viewHolder.nameTV.setText(item);

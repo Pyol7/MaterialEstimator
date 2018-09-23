@@ -54,17 +54,19 @@ public class ProjectItem {
         return totalPrice;
     }
 
-    public void calcTotalPrice() {
+    public double calcTotalPrice() {
         //Sum price from every material in the list.
         double total = 0;
         for (Material material : materialList.getList() ) {
             total += material.getPrice();
         }
         this.totalPrice = total;
+        return total;
     }
 
     @Override
     public String toString() {
         return name;
     }
+
 }

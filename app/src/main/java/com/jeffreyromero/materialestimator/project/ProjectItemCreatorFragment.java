@@ -2,7 +2,6 @@ package com.jeffreyromero.materialestimator.project;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -17,20 +16,20 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
 import com.jeffreyromero.materialestimator.R;
+import com.jeffreyromero.materialestimator.data.Deserializer;
 import com.jeffreyromero.materialestimator.data.MaterialListsDataSource;
-import com.jeffreyromero.materialestimator.material.SingleInputDialog;
 import com.jeffreyromero.materialestimator.material.SingleSelectDialog;
 import com.jeffreyromero.materialestimator.models.Material;
 import com.jeffreyromero.materialestimator.models.MaterialList;
+import com.jeffreyromero.materialestimator.models.Project;
 import com.jeffreyromero.materialestimator.models.ProjectItem;
+import com.jeffreyromero.materialestimator.utilities.SingleInputDialog;
 
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Locale;
 
@@ -42,30 +41,33 @@ public class ProjectItemCreatorFragment extends Fragment implements
         SingleSelectDialog.OnDialogSubmitListener,
         SingleInputDialog.OnDialogSubmitListener {
 
-    private static final String SELECTED_LIST_POSITION = "Selected List Position";
-    private static final String PROJECT_ITEM_NAME = "Untitled";
+    private static final String PROJECT = "project";
     private OnFragmentInteractionListener mListener;
     private MaterialListsDataSource userMaterialListsDataSource;
     private ArrayList<MaterialList> userMaterialLists;
+    private int selectedMaterialListPosition;
     private SharedPreferences activitySP;
     private ProjectItemAdapter adapter;
-    private int selectedListPosition;
     private TextView projectItemNameTV;
     private TextView projectItemListNameTV;
     private ProjectItem projectItem;
-    private String projectItemName;
     private TextView lengthET;
     private TextView widthET;
+    private Project project;
+    private View view;
     private Context context;
-    private double length;
-    private double width;
 
     public ProjectItemCreatorFragment() {
         // Required empty public constructor
     }
 
-    public static ProjectItemCreatorFragment newInstance() {
-        return new ProjectItemCreatorFragment();
+    public static ProjectItemCreatorFragment newInstance(Project project) {
+        ProjectItemCreatorFragment fragment = new ProjectItemCreatorFragment();
+        Bundle args = new Bundle();
+        String json = new Gson().toJson(project);
+        args.putString(PROJECT, json);
+        fragment.setArguments(args);
+        return fragment;
     }
 
     public interface OnFragmentInteractionListener {
@@ -89,19 +91,36 @@ public class ProjectItemCreatorFragment extends Fragment implements
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (getArguments() != null) {
+            String json = getArguments().getString(PROJECT);
+            project = Deserializer.toProject(json);
+        }
+
         //Load User material list data source.
         userMaterialListsDataSource =
                 new MaterialListsDataSource(getString(R.string.user_material_lists), context);
+
         //Get all user materialLists.
         userMaterialLists = userMaterialListsDataSource.getAll();
+
+        //Get activity shared preferences.
         activitySP = getActivity().getPreferences(Context.MODE_PRIVATE);
-        //Use the stored position or set zero.
-        selectedListPosition = activitySP.getInt(SELECTED_LIST_POSITION, 0);
-        //Create a ProjectItem using the stored item name or the default name.
-        projectItem = new ProjectItem(activitySP.getString(PROJECT_ITEM_NAME, PROJECT_ITEM_NAME));
-        projectItemName = projectItem.getName();
-        //Instantiate the adapter
-        adapter = new ProjectItemAdapter(userMaterialLists.get(selectedListPosition));
+
+        //Get the stored list position or use the first list.
+        selectedMaterialListPosition = activitySP.getInt(
+                context.getString(R.string.selected_material_list_position),
+                0
+        );
+
+        //Create a ProjectItem.
+        projectItem = new ProjectItem(getString(R.string.projectItemNameTV_text));
+
+        //Set list to project item.
+        projectItem.setMaterialList(userMaterialLists.get(selectedMaterialListPosition));
+
+        //Instantiate the adapter.
+        adapter = new ProjectItemAdapter();
     }
 
     @Override
@@ -109,34 +128,45 @@ public class ProjectItemCreatorFragment extends Fragment implements
                              Bundle savedInstanceState) {
         //Show options menu.
         setHasOptionsMenu(true);
+
         // Inflate the layout for this fragment
-        final View view = inflater.inflate(
+        view = inflater.inflate(
                 R.layout.project_item_creator_fragment,
                 container,
                 false
         );
-        //Display the selected list.
+
+        //Set a title to the toolbar.
+//        ActionBar actionBar = ((AppCompatActivity)getActivity()).getSupportActionBar();
+//        actionBar.setTitle(project.getName());
+//        actionBar.setSubtitle(getString(R.string.projectItemCreatorFragment_title));
+
+        getActivity().setTitle(project.getName());
+
+        //Show help message if there is no project items in project.
+        if (project.getProjectItems().size() == 0) {
+            showAddProjectItemMessageDialog();
+        }
+
+        //Set project item name and click listener.
+        projectItemNameTV = view.findViewById(R.id.projectItemNameTV);
+        projectItemNameTV.setText(projectItem.getName());
+        projectItemNameTV.setOnClickListener(new showAddNameDialog());
+        View projectItemNameIcon = view.findViewById(R.id.projectItemNameIcon);
+        projectItemNameIcon.setOnClickListener(new showAddNameDialog());
+
+        //Set the current list name and click listener.
+        projectItemListNameTV = view.findViewById(R.id.projectItemListNameTV);
+        projectItemListNameTV.setText(projectItem.getMaterialList().getName());
+        projectItemListNameTV.setOnClickListener(new showMaterialListSelectDialog());
+        View projectItemListNameIcon = view.findViewById(R.id.projectItemListNameIcon);
+        projectItemListNameIcon.setOnClickListener(new showMaterialListSelectDialog());
+
+        //Display the current project item list.
         RecyclerView rv = view.findViewById(R.id.recyclerView);
+        rv.setHasFixedSize(true);
         rv.setAdapter(adapter);
         rv.setLayoutManager(new LinearLayoutManager(context));
-
-        //Set project item name and edit button.
-        projectItemNameTV = view.findViewById(R.id.projectItemNameTV);
-        projectItemNameTV.setText(projectItemName);
-        projectItemNameTV.setOnClickListener(new AddNameDialog());
-        ImageView projectItemNameEditBtn = view.findViewById(R.id.projectItemNameEditBtn);
-        projectItemNameEditBtn.setOnClickListener(new AddNameDialog());
-
-        //Set List name
-        projectItemListNameTV = view.findViewById(R.id.projectItemListNameTV);
-        projectItemListNameTV.setText("( " + adapter.getSelectedList() + " )");
-
-        //Set total cost.
-        TextView totalTV = view.findViewById(R.id.totalTV);
-        totalTV.setText(String.format(
-                Locale.US,
-                "$%.2f",
-                projectItem.getTotalPrice()));
 
         //Calculate quantities based on user input.
         Button btn = view.findViewById(R.id.calcBTN);
@@ -146,11 +176,12 @@ public class ProjectItemCreatorFragment extends Fragment implements
                 //Get user inputs.
                 lengthET = view.findViewById(R.id.lengthTV);
                 widthET = view.findViewById(R.id.widthTV);
+                //Check the length of the input text to determine if its empty.
                 int lengthSize = lengthET.getText().toString().trim().length();
                 int widthSize = widthET.getText().toString().trim().length();
-                if (lengthSize != 0 && widthSize != 0){
+                if (lengthSize != 0 && widthSize != 0) {
 
-                    calculateMaterialAndCreateProjectItem(view);
+                    calculateQuantities(view);
 
                 } else {
                     //todo - change to snack bar.
@@ -162,49 +193,42 @@ public class ProjectItemCreatorFragment extends Fragment implements
         return view;
     }
 
-    private void calculateMaterialAndCreateProjectItem(View view){
-        //Ensure that a project item has a name.
-        TextView projectItemNameTV = view.findViewById(R.id.projectItemNameTV);
-        String projectItemName = projectItemNameTV.getText().toString();
-        if (!projectItemName.equals(PROJECT_ITEM_NAME)) {
+    private void calculateQuantities(View view) {
+        //Get inputs.
+        double length = Double.valueOf(lengthET.getText().toString());
+        double width = Double.valueOf(widthET.getText().toString());
 
-            length = Double.valueOf(lengthET.getText().toString());
-            width = Double.valueOf(widthET.getText().toString());
+        //Build the project item.
+        projectItem.setLength(length);
+        projectItem.setWidth(width);
 
-            //Build the project item.
-            projectItem.setLength(length);
-            projectItem.setWidth(width);
-            projectItem.setMaterialList(adapter.getSelectedList());
+        //Calculate quantities.
+        projectItem.getMaterialList().calculateQuantities(length, width);
 
-            //Calculate quantities.
-            adapter.calculateQuantities(length, width);
+        //Update adapter
+        adapter.notifyDataSetChanged();
 
-            //Calculate and set total cost.
-            projectItem.calcTotalPrice();
-            TextView totalTV = view.findViewById(R.id.totalTV);
-            totalTV.setText(String.format(
-                    Locale.US,
-                    "$%.2f",
-                    projectItem.getTotalPrice()));
+        //Close keyboard and clear focus from inputs.
+        InputMethodManager imm = (InputMethodManager) getActivity()
+                .getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
 
-            //Close keyboard and clear focus from inputs.
-            InputMethodManager imm = (InputMethodManager) getActivity()
-                    .getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-            lengthET.clearFocus();
-            widthET.clearFocus();
-
-        } else {
-            //todo - change to snack bar.
-            Toast.makeText(context, "Add a name to this project item", Toast.LENGTH_LONG).show();
-        }
+        lengthET.clearFocus();
+        widthET.clearFocus();
     }
 
-    private class AddNameDialog implements View.OnClickListener {
+    private void showAddProjectItemMessageDialog() {
+        //Create and show dialog.
+        AddProjectItemMessageDialog f = AddProjectItemMessageDialog.newInstance();
+        f.show(getActivity().getSupportFragmentManager(), f.getClass().getSimpleName());
+    }
+
+    //Uses SingleInputDialog
+    private class showAddNameDialog implements View.OnClickListener {
         @Override
         public void onClick(View v) {
             //Open single input dialog to update name.
-            SingleInputDialog f = SingleInputDialog.newInstance(getString(R.string.add_name_dialog_title), projectItemName);
+            SingleInputDialog f = SingleInputDialog.newInstance(getString(R.string.add_name_dialog_title), projectItem.getName());
             // Set target fragment
             f.setTargetFragment(ProjectItemCreatorFragment.this, 0);
             // Show fragment
@@ -212,159 +236,191 @@ public class ProjectItemCreatorFragment extends Fragment implements
         }
     }
 
-    private void addNameDialog(View v){
-        //Open single input dialog to update name.
-        SingleInputDialog f = SingleInputDialog.newInstance(getString(R.string.add_name_dialog_title), projectItemName);
-        // Set target fragment
-        f.setTargetFragment(ProjectItemCreatorFragment.this, 0);
-        // Show fragment
-        f.show(getActivity().getSupportFragmentManager(), f.getClass().getSimpleName());
+    @Override
+    public void OnSingleInputDialogSubmit(String userInput) {
+        projectItem.setName(userInput);
+        projectItemNameTV.setText(userInput);
+    }
+
+    private class showMaterialListSelectDialog implements View.OnClickListener {
+        @Override
+        public void onClick(View v) {
+            //Show select dialog with all userMaterialLists.
+            SingleSelectDialog f = SingleSelectDialog.newInstance(
+                    getString(R.string.select_list_dialog_title),
+                    userMaterialListsDataSource.getAllKeys(),
+                    selectedMaterialListPosition
+            );
+            // Set the target fragment for this dialog.
+            f.setTargetFragment(ProjectItemCreatorFragment.this, 0);
+            f.show(getActivity().getSupportFragmentManager(), f.getClass().getSimpleName());
+        }
+    }
+
+    @Override
+    public void OnSingleSelectDialogSubmit(int selectedMaterialListPosition) {
+        this.selectedMaterialListPosition = selectedMaterialListPosition;
+        //Store the selected position to activity SP.
+        activitySP.edit().putInt(
+                getString(R.string.selected_material_list_position),
+                selectedMaterialListPosition
+        ).apply();
+        projectItem.setMaterialList(userMaterialLists.get(selectedMaterialListPosition));
+        projectItemListNameTV.setText(projectItem.getMaterialList().getName());
+        adapter.notifyDataSetChanged();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        //Reload al  userMaterialLists to catch any changes.
+        //Reload all userMaterialLists just in case the user made changes.
         userMaterialLists = userMaterialListsDataSource.getAll();
-        //Set the selected list or the first list to the adapter.
-        selectedListPosition = activitySP.getInt(SELECTED_LIST_POSITION, 0);
-        if (selectedListPosition <= userMaterialLists.size()) {
-            adapter.setList(userMaterialLists.get(selectedListPosition));
-        } else {
-            adapter.setList(userMaterialLists.get(0));
-        }
-        projectItemListNameTV.setText("( " + adapter.getSelectedList() + " )");
-        //Use the stored item name or set a name.
-        projectItemName = activitySP.getString(PROJECT_ITEM_NAME, PROJECT_ITEM_NAME);
-        projectItemNameTV.setText(projectItemName);
     }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        //Create the save menu item.
-        MenuItem itemSave = menu.add(Menu.NONE, R.id.action_save, 2, R.string.action_save);
-        itemSave.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-        itemSave.setIcon(R.drawable.ic_save_white_24dp);
+        //Create the help menu item.
+        MenuItem help = menu.add(Menu.NONE, R.id.action_save, 1, R.string.action_save);
+        help.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        help.setIcon(R.drawable.ic_save_white_24dp);
 
-        MenuItem itemList = menu.add(Menu.NONE, R.id.action_material_lists, 1, R.string.action_material_lists);
-        itemList.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-        itemList.setIcon(R.drawable.ic_list_white_24dp);
+        //Create the save menu item.
+        MenuItem save = menu.add(Menu.NONE, R.id.action_help, 2, R.string.action_help);
+        save.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        save.setIcon(R.drawable.ic_help_outline_white_24dp);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.action_material_lists:
-                //Show select dialog with all userMaterialLists.
-                SingleSelectDialog f = SingleSelectDialog.newInstance(
-                        getString(R.string.select_list_dialog_title),
-                        userMaterialListsDataSource.getAllKeys(),
-                        selectedListPosition
-                );
-                // Set the target fragment for this dialog.
-                f.setTargetFragment(ProjectItemCreatorFragment.this, 0);
-                f.show(getActivity().getSupportFragmentManager(), f.getClass().getSimpleName());
+            case R.id.action_save:
+
+                saveProjectItem();
                 return true;
 
-            case R.id.action_save:
-                //Pass the created ProjectItem to the hosting fragment.
-                mListener.onProjectItemCreated(projectItem);
-                //Reset the projectItem name in activity SP.
-                activitySP.edit().putString(PROJECT_ITEM_NAME, PROJECT_ITEM_NAME).apply();
-                //Redirect back to hosting fragment.
-                getFragmentManager().popBackStackImmediate();
+            case R.id.action_help:
+
+                showAddProjectItemMessageDialog();
                 return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void OnSingleInputDialogSubmit(String userInput) {
-        projectItemName = userInput;
-        projectItemNameTV.setText(userInput);
-        //Store the item name to activity SP.
-        activitySP.edit().putString(PROJECT_ITEM_NAME, userInput).apply();
-    }
-
-    @Override
-    public void OnSingleSelectDialogSubmit(int selectedListPosition) {
-        this.selectedListPosition = selectedListPosition;
-        //Store the selected position to activity SP.
-        activitySP.edit().putInt(SELECTED_LIST_POSITION, selectedListPosition).apply();
-        adapter.setList(userMaterialLists.get(selectedListPosition));
-        projectItemListNameTV.setText("( " + adapter.getSelectedList() + " )");
+    private void saveProjectItem() {
+        //Ensure that a project item has a name before saving.
+        TextView projectItemNameTV = view.findViewById(R.id.projectItemNameTV);
+        String projectItemName = projectItemNameTV.getText().toString();
+        if (!projectItemName.equals(getString(R.string.projectItemNameTV_text))) {
+            //Pass the created ProjectItem to the hosting fragment.
+            mListener.onProjectItemCreated(projectItem);
+            //Redirect back to hosting fragment.
+            getFragmentManager().popBackStackImmediate();
+        } else {
+            //todo - change to snack bar.
+            Toast.makeText(context, "Enter a name before saving", Toast.LENGTH_LONG).show();
+        }
     }
 
     //------------------------------- Adapter -------------------------------//
 
     public class ProjectItemAdapter extends RecyclerView.Adapter {
-        private MaterialList selectedList;
-
-        ProjectItemAdapter(MaterialList selectedList) {
-            this.selectedList = selectedList;
-        }
-
-        void setList(MaterialList selectedList) {
-            this.selectedList = selectedList;
-            notifyDataSetChanged();
-        }
-
-        MaterialList getSelectedList() {
-            return selectedList;
-        }
-
-        public void calculateQuantities(double length, double width) {
-            selectedList.calculateQuantities(length, width);
-            notifyDataSetChanged();
-        }
+        //View types
+        private final int ITEM_VIEW = 0;
+        private final int TOTAL_VIEW = 1;
 
         @Override
         public int getItemCount() {
-            return selectedList.size();
+            return projectItem.getMaterialList() == null ? 0 :
+                    projectItem.getMaterialList().size() + 1;
+        }
+
+        //Determine which layout to use for the row.
+        @Override
+        public int getItemViewType(int position) {
+            if (position < getItemCount() - 1) {
+                return ITEM_VIEW;
+            } else {
+                return TOTAL_VIEW;
+            }
         }
 
         @NonNull
         @Override
-        public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            // Get the inflater
-            LayoutInflater inflater = LayoutInflater.from(context);
-            // Inflate the item view layout
-            View itemView = inflater.inflate(R.layout.project_item_list_item, parent, false);
-            return new ItemViewHolder(itemView);
+        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+
+            if (viewType == ITEM_VIEW) {
+                // Inflate the ITEM_VIEW.
+                return new ItemVH(LayoutInflater.from(context).inflate(
+                        R.layout.project_item_creator_list_item, parent, false));
+
+            } else if (viewType == TOTAL_VIEW) {
+                // Inflate the TOTAL_VIEW.
+                return new TotalVH(LayoutInflater.from(context).inflate(
+                        R.layout.total_list_item, parent, false));
+
+            } else {
+                //Throw exception if view type is not found.
+                throw new RuntimeException("View type not found");
+            }
         }
 
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-            Material material = selectedList.get(position);
-            ItemViewHolder viewHolder = (ItemViewHolder) holder;
-            if (position %2 == 0){
-                viewHolder.itemView.setBackgroundColor(getResources().getColor(R.color.lightGray));
-            } else {
-                viewHolder.itemView.setBackgroundColor(getResources().getColor(R.color.white));
+            switch (holder.getItemViewType()) {
+
+                case ITEM_VIEW:
+                    Material material = projectItem.getMaterialList().get(position);
+                    ItemVH itemVH = (ItemVH) holder;
+                    if (position % 2 == 0) {
+                        itemVH.itemView.setBackgroundColor(getResources().getColor(R.color.lightGray));
+                    } else {
+                        itemVH.itemView.setBackgroundColor(getResources().getColor(R.color.white));
+                    }
+                    itemVH.nameTV.setText(material.toString());
+                    String qup = String.format(
+                            Locale.US,
+                            "%.0f pcs   @   $%.2f",
+                            material.getQuantity(),
+                            material.getUnitPrice());
+                    itemVH.quantityUnitPriceTV.setText(qup);
+                    itemVH.priceTV.setText(String.format(
+                            Locale.US,
+                            "$%.2f",
+                            material.getPrice()));
+                    break;
+
+                case TOTAL_VIEW:
+                    TotalVH totalVH = (TotalVH) holder;
+                    totalVH.totalTV.setText(String.format(
+                            Locale.US,
+                            "$%.2f",
+                            projectItem.calcTotalPrice()));
+                    break;
+
+                default:
+                    break;
             }
-            viewHolder.nameTV.setText(material.toString());
-            String qup = String.format(
-                    Locale.US,
-                    "%.0fpcs  @  $%.2f",
-                    material.getQuantity(),
-                    material.getUnitPrice());
-            viewHolder.quantityUnitPriceTV.setText(qup);
-            viewHolder.priceTV.setText(String.format(
-                    Locale.US,
-                    "$%.2f",
-                    material.getPrice()));
         }
 
-        private class ItemViewHolder extends RecyclerView.ViewHolder {
+        private class ItemVH extends RecyclerView.ViewHolder {
             TextView nameTV;
             TextView quantityUnitPriceTV;
             TextView priceTV;
 
-            ItemViewHolder(final View itemView) {
+            ItemVH(final View itemView) {
                 super(itemView);
                 nameTV = itemView.findViewById(R.id.nameTV);
                 quantityUnitPriceTV = itemView.findViewById(R.id.quantityUnitPriceTV);
                 priceTV = itemView.findViewById(R.id.priceTV);
+            }
+        }
+
+        private class TotalVH extends RecyclerView.ViewHolder {
+            TextView totalTV;
+
+            TotalVH(View itemView) {
+                super(itemView);
+                totalTV = itemView.findViewById(R.id.totalTV);
             }
         }
     }

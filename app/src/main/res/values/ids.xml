@@ -3,4 +3,5 @@
     <item name="action_add" type="id" />
     <item name="action_save" type="id" />
     <item name="action_material_lists" type="id" />
+    <item name="action_help" type="id" />
 </resources>

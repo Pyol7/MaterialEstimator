@@ -6,10 +6,76 @@
     android:layout_height="match_parent"
     tools:context=".project.ProjectItemCreatorFragment">
 
-    <!--Input Group Start-->
+    <TextView
+        android:id="@+id/projectItemNameTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center"
+        android:selectAllOnFocus="true"
+        android:textColor="@color/colorPrimary"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="@string/untitled" />
 
+    <ImageView
+        android:id="@+id/projectItemNameIcon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:contentDescription="@string/edit_icon_content_description"
+        android:src="@drawable/ic_edit_gray_16dp"
+        app:layout_constraintBottom_toBottomOf="@+id/projectItemNameTV"
+        app:layout_constraintStart_toEndOf="@+id/projectItemNameTV"
+        app:layout_constraintTop_toTopOf="@+id/projectItemNameTV" />
+
+    <TextView
+        android:id="@+id/projectItemListNameTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:focusable="auto"
+        android:gravity="center"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/projectItemNameTV"
+        tools:text="Material List" />
+
+    <ImageView
+        android:id="@+id/projectItemListNameIcon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/select_list_icon_content_description"
+        android:src="@drawable/ic_arrow_drop_down_gray_24dp"
+        app:layout_constraintStart_toEndOf="@+id/projectItemListNameTV"
+        app:layout_constraintTop_toTopOf="@+id/projectItemListNameTV" />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:elevation="0dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/projectItemListNameTV" />
+
+
+    <!--Input Group Start-->
     <LinearLayout
-        android:id="@+id/linearLayout"
+        android:id="@+id/calc_input_groupLL"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="?android:attr/colorBackground"
@@ -34,7 +100,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:hint="@string/lengthET_hint"
+                android:hint="@string/length"
                 android:inputType="numberDecimal"
                 android:selectAllOnFocus="true"
                 android:singleLine="true" />
@@ -64,95 +130,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:hint="@string/widthET_hint"
+                android:hint="@string/width"
                 android:inputType="numberDecimal"
                 android:selectAllOnFocus="true"
                 android:singleLine="true" />
         </android.support.design.widget.TextInputLayout>
+
     </LinearLayout>
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/recyclerView"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:elevation="0dp"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/projectItemListNameTV" />
-
-    <TextView
-        android:id="@+id/projectItemNameTV"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical|center"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="16dp"
-        android:clickable="true"
-        android:focusable="true"
-        android:gravity="center"
-        android:selectAllOnFocus="true"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="@string/projectItemNameTV_hint" />
-
-    <TextView
-        android:id="@+id/projectItemListNameTV"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:focusable="auto"
-        android:gravity="center"
-        android:textSize="14sp"
-        android:textStyle="italic"
-        app:layout_constraintEnd_toEndOf="@+id/projectItemNameTV"
-        app:layout_constraintStart_toStartOf="@+id/projectItemNameTV"
-        app:layout_constraintTop_toBottomOf="@+id/projectItemNameTV"
-        tools:text="@string/projectItemListNameTV_hint" />
-
-    <ImageButton
-        android:id="@+id/projectItemNameEditBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:layout_marginBottom="4dp"
-        android:layout_marginStart="8dp"
-        android:adjustViewBounds="false"
-        android:background="@android:color/transparent"
-        android:contentDescription="@string/content_description"
-        android:cropToPadding="false"
-        android:src="@drawable/ic_edit_white_24dp"
-        app:layout_constraintBottom_toBottomOf="@+id/projectItemNameTV"
-        app:layout_constraintStart_toEndOf="@+id/projectItemNameTV" />
-
-    <TextView
-        android:id="@+id/totalLabelTV"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:text="@string/total_label"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="@+id/totalTV"
-        app:layout_constraintEnd_toStartOf="@+id/totalTV" />
-
-    <TextView
-        android:id="@+id/totalTV"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:layout_marginTop="24dp"
-        android:textSize="16sp"
-        app:layout_constraintEnd_toEndOf="@+id/recyclerView"
-        app:layout_constraintTop_toBottomOf="@+id/recyclerView"
-        tools:text="$12,000.00" />
-
-
     <!--Input Group End-->
+
 </android.support.constraint.ConstraintLayout>

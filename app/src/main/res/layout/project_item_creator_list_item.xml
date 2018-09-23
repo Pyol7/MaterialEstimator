@@ -15,7 +15,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:textColor="@color/colorPrimary"
-        android:textSize="16sp"
+        android:textSize="14sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="Ceiling Tiles 24x24" />
@@ -36,6 +36,6 @@
         android:layout_marginTop="4dp"
         app:layout_constraintStart_toStartOf="@+id/nameTV"
         app:layout_constraintTop_toBottomOf="@+id/nameTV"
-        tools:text="240psc @ $12.50" />
+        tools:text="240 psc @ $12.50" />
 
 </android.support.constraint.ConstraintLayout>

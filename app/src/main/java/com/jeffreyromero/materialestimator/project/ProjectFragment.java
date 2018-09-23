@@ -2,43 +2,60 @@ package com.jeffreyromero.materialestimator.project;
 
 
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.FileProvider;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.ShareActionProvider;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.gson.Gson;
-import com.jeffreyromero.materialestimator.utilities.CustomRecyclerView;
 import com.jeffreyromero.materialestimator.R;
 import com.jeffreyromero.materialestimator.data.Deserializer;
 import com.jeffreyromero.materialestimator.data.ProjectsDataSource;
+import com.jeffreyromero.materialestimator.models.Material;
 import com.jeffreyromero.materialestimator.models.Project;
 import com.jeffreyromero.materialestimator.models.ProjectItem;
 
-import java.util.ArrayList;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Locale;
+
 
 /**
- * Displays a Project including it's list of ProjectItems.
- * Receives a Project from the activity and
- * Returns the the Project back to the activity on
+ * Receives a Project from the activity and displays it.
  */
 public class ProjectFragment extends Fragment implements
         ProjectItemCreatorFragment.OnFragmentInteractionListener {
 
+    private static final String LOG_TAG = ProjectFragment.class.getSimpleName();
     private static final String PROJECT = "project";
+    private ShareActionProvider mShareActionProvider;
+    private MaterialListAdapter materialListAdapter;
+    private ProjectItemAdapter projectItemAdapter;
     private OnItemClickListener mListener;
-    private ProjectAdapter adapter;
     private Project project;
     private Context context;
+    private View view;
 
     public ProjectFragment() {
         // Required empty public constructor
@@ -73,12 +90,19 @@ public class ProjectFragment extends Fragment implements
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //Set all fields.
+
         if (getArguments() != null) {
             String json = getArguments().getString(PROJECT);
             project = Deserializer.toProject(json);
         }
-        adapter = new ProjectAdapter(project.getProjectItems());
+
+        //If project items is empty show ProjectItemCreator.
+//        if (project.getProjectItems().size() == 0) {
+//            showProjectItemCreator();
+//        }
+
+        projectItemAdapter = new ProjectItemAdapter();
+        materialListAdapter = new MaterialListAdapter();
     }
 
     @Override
@@ -86,17 +110,24 @@ public class ProjectFragment extends Fragment implements
                              Bundle savedInstanceState) {
         //Show options menu.
         setHasOptionsMenu(true);
+
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.project_fragment, container, false);
+        view = inflater.inflate(R.layout.project_fragment, container, false);
 
         //Set a title to the toolbar.
         getActivity().setTitle(project.getName());
 
+        //Set client, location, dateCreated and description.
+        TextView clientTV = view.findViewById(R.id.clientTV);
+        TextView locationTV = view.findViewById(R.id.locationTV);
+        TextView dateCreatedTV = view.findViewById(R.id.dateCreatedTV);
+        clientTV.setText(project.getClient());
+        locationTV.setText(project.getLocation());
+        dateCreatedTV.setText(project.getDateCreated());
+
         //Set up the recyclerView.
-        CustomRecyclerView rv = view.findViewById(R.id.customRecyclerView);
-        rv.setHasFixedSize(true);
-        rv.setEmptyView(view.findViewById(R.id.empty_view));
-        rv.setAdapter(adapter);
+        RecyclerView rv = view.findViewById(R.id.recyclerView);
+        rv.setAdapter(projectItemAdapter);
 
         return view;
     }
@@ -109,107 +140,324 @@ public class ProjectFragment extends Fragment implements
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        //Add the add (+) button to the root menu.
-        MenuItem item = menu.add(Menu.NONE, R.id.action_add, 10, R.string.action_add);
-        item.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
-        item.setIcon(R.drawable.ic_add_white_24dp);
+        inflater.inflate(R.menu.project_menu, menu);
+        //Locate MenuItem with ShareActionProvider
+        MenuItem item = menu.findItem(R.id.action_share);
+        //Fetch and store ShareActionProvider
+        mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.action_add) {
-
-            //Show the ProjectItemCreatorFragment.
-            ProjectItemCreatorFragment f = ProjectItemCreatorFragment.newInstance();
-            f.setTargetFragment(ProjectFragment.this, 0);
-            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.fragment_container, f, f.getClass().getSimpleName());
-            transaction.addToBackStack(f.getClass().getSimpleName());
-            transaction.commit();
-
-            return true;
+        switch (item.getItemId()) {
+            case R.id.action_add:
+                showProjectItemCreator();
+                return true;
+            case R.id.action_share:
+                setShareIntent(createIntent());
+                return true;
+            case R.id.action_project_item_view:
+                showProjectItemView();
+                return true;
+            case R.id.action_material_list_view:
+                showMaterialListView();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
-        return super.onOptionsItemSelected(item);
+    }
+
+    private void setShareIntent(Intent intent) {
+        if (mShareActionProvider != null) {
+            mShareActionProvider.setShareIntent(intent);
+        }
+        else {
+            Log.d(LOG_TAG, "Share action provider is null");
+        }
+    }
+
+    private Intent createIntent(){
+        //Create bitmap
+        Bitmap mBitmap = createFinalBitmap();
+        //Save bitmap to cache directory
+        try {
+            //Create subdirectory in cache which corresponds to path.filepaths.xml
+            File cachePath = new File(getActivity().getCacheDir(), "tempSharedImageDir");
+            cachePath.mkdirs();
+
+            //Overwrites this image every time
+            FileOutputStream stream = new FileOutputStream(cachePath + "/material_estimator_list.jpg");
+
+            mBitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+            stream.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        //Read image from cache
+        //Get directory: cache/tempSharedImageDir
+        File imagePath = new File(getActivity().getCacheDir(), "tempSharedImageDir");
+        //Get file: cache/tempSharedImageDir/material_estimator_list.jpg
+        File newFile = new File(imagePath, "material_estimator_list.jpg");
+        //Create uri:
+        // content://com.jeffreyromero.materialestimator.fileprovider/temp_shared_image/tempShareImage.png
+        Uri contentUri = FileProvider.getUriForFile(
+                getActivity(),
+                "com.jeffreyromero.materialestimator.fileprovider",
+                newFile
+        );
+        //Send image via intent
+        if (contentUri != null) {
+            Intent shareIntent = new Intent();
+            shareIntent.setAction(Intent.ACTION_SEND);
+            //Temp permission for receiving app to read this file
+            shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            shareIntent.setDataAndType(contentUri, context.getContentResolver().getType(contentUri));
+            shareIntent.putExtra(Intent.EXTRA_STREAM, contentUri);
+            shareIntent.setType("image/jpg");
+            return shareIntent;
+        }
+        return null;
+    }
+
+    private Bitmap createFinalBitmap(){
+        //Create individual bitmaps
+        Bitmap header = createBitmapFromView(view.findViewById(R.id.headerCL));
+        Bitmap recyclerView = createBitmapFromView(view.findViewById(R.id.recyclerView));
+        //Combine bitmaps
+        return combineBitmaps(header, recyclerView);
+    }
+
+    private Bitmap createBitmapFromView(View v) {
+        if (v instanceof RecyclerView){
+            //Scroll to top for correct measurements
+            ((RecyclerView) v).getLayoutManager().scrollToPosition(0);
+        }
+        v.measure(
+                View.MeasureSpec.makeMeasureSpec(v.getWidth(), View.MeasureSpec.EXACTLY),
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+        Bitmap bitmap = Bitmap.createBitmap(
+                v.getWidth(),
+                v.getMeasuredHeight(),
+                Bitmap.Config.ARGB_8888);
+        //Bind a canvas to it
+        Canvas canvas = new Canvas(bitmap);
+        //Get the view's background
+        Drawable bgDrawable = v.getBackground();
+        if (bgDrawable != null) {
+            //has background drawable, then draw it on the canvas
+            bgDrawable.draw(canvas);
+        }   else{
+            //does not have background drawable, then draw white background on the canvas
+            canvas.drawColor(getResources().getColor(R.color.white));
+        }
+        //Draw the view on the canvas
+        v.draw(canvas);
+        return bitmap;
+    }
+
+    private Bitmap combineBitmaps(Bitmap b1, Bitmap b2){
+        int width = b1.getWidth();
+        int height = b1.getHeight() + b2.getHeight();
+        Bitmap newBitmap = Bitmap.createBitmap(width, height, b1.getConfig());
+        Canvas canvas = new Canvas(newBitmap);
+        canvas.drawBitmap(b1, 0, 0, null);
+        canvas.drawBitmap(b2, 0, b1.getHeight(), null);
+        return newBitmap;
+    }
+
+    private void showMaterialListView(){
+        //Create a new adapter and set it to the existing recyclerView.
+        RecyclerView rv = view.findViewById(R.id.recyclerView);
+        rv.setAdapter(materialListAdapter);
+    }
+
+    private void showProjectItemView(){
+        //Create a new adapter and set it to the existing recyclerView.
+        RecyclerView rv = view.findViewById(R.id.recyclerView);
+        rv.setAdapter(projectItemAdapter);
+    }
+
+    private void showProjectItemCreator() {
+        //Show the ProjectItemCreatorFragment.
+        ProjectItemCreatorFragment f = ProjectItemCreatorFragment.newInstance(project);
+        f.setTargetFragment(ProjectFragment.this, 0);
+        FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.fragment_container, f, f.getClass().getSimpleName());
+        transaction.addToBackStack(f.getClass().getSimpleName());
+        transaction.commit();
     }
 
     @Override
     public void onProjectItemCreated(ProjectItem projectItem) {
         //Add the created ProjectItem to the current Project.
-        adapter.addProjectItem(projectItem);
+        project.addProjectItem(projectItem);
+        projectItemAdapter.notifyDataSetChanged();
+//        materialListAdapter.notifyDataSetChanged();
         //TODO - Create stackOverflow background animation.
-        Toast.makeText(context, "New Item Created", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(context, "New Item Created", Toast.LENGTH_SHORT).show();
         //Save the project to the project data source.
         ProjectsDataSource pds = new ProjectsDataSource(context);
         pds.put(project);
     }
 
-    //------------------------------- Adapter -------------------------------//
+    //------------------------------- ProjectItemAdapter -------------------------------//
 
-    public class ProjectAdapter extends RecyclerView.Adapter {
-        private ArrayList<ProjectItem> projectItems;
+    public class ProjectItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+        //View types
+        private final int ITEM_VIEW = 0;
+        private final int TOTAL_VIEW = 1;
 
-        ProjectAdapter(ArrayList<ProjectItem> projectItems) {
-            this.projectItems = projectItems;
-        }
-
-        public ArrayList<ProjectItem> getProjectItems() {
-            return projectItems;
-        }
-
-        public void setProjectItems(ArrayList<ProjectItem> projectItems) {
-            this.projectItems = projectItems;
-            notifyDataSetChanged();
-        }
-
-        void addProjectItem(ProjectItem projectItem){
-            projectItems.add(projectItem);
-            project.setProjectItems(projectItems);
-            notifyDataSetChanged();
-            //Save project.
-
-        }
 
         @Override
         public int getItemCount() {
-            return projectItems.size();
+            return project.getProjectItems() == null ? 0 : project.getProjectItems().size() + 1;
+        }
+
+        //Determine which layout to use for the row.
+        @Override
+        public int getItemViewType(int position) {
+            if (position < getItemCount() - 1) {
+                return ITEM_VIEW;
+            } else {
+                return TOTAL_VIEW;
+            }
         }
 
         @NonNull
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            // Get the inflater
-            LayoutInflater inflater = LayoutInflater.from(context);
-            // Inflate the item view layout
-            View itemView = inflater.inflate(R.layout.list_item_textview_textview, parent, false);
-            return new ItemViewHolder(itemView);
+            if (viewType == ITEM_VIEW) {
+                //Inflate the ITEM_VIEW.
+                return new ItemVH(LayoutInflater.from(context).inflate(
+                        R.layout.project_list_item, parent, false));
+
+            } else if (viewType == TOTAL_VIEW) {
+                //Inflate the TOTAL_VIEW.
+                return new TotalVH(LayoutInflater.from(context).inflate(
+                        R.layout.total_list_item, parent, false));
+
+            } else {
+                //Throw exception if view type is not found.
+                throw new RuntimeException("View type not found");
+            }
         }
 
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-            ProjectItem item = projectItems.get(position);
-            ItemViewHolder viewHolder = (ItemViewHolder) holder;
-            viewHolder.columnLeftTV.setText(item.getName());
-            viewHolder.columnRightTV.setText(String.valueOf(item.getMaterialList().size()));
+            switch (holder.getItemViewType()) {
+
+                case ITEM_VIEW:
+                    ProjectItem pi = project.getProjectItems().get(position);
+                    ItemVH itemVH = (ItemVH) holder;
+                    if (position % 2 == 0) {
+                        itemVH.itemView.setBackgroundColor(getResources().getColor(R.color.lightGray));
+                    } else {
+                        itemVH.itemView.setBackgroundColor(getResources().getColor(R.color.white));
+                    }
+                    itemVH.nameTV.setText(pi.getName());
+                    double area = pi.getLength() * pi.getWidth();
+                    String dimArea = String.format(
+                            Locale.US,
+                            "%.0fft x %.0fft  (%.0fft2)",
+                            pi.getLength(),
+                            pi.getWidth(),
+                            area);
+                    itemVH.dimAreaTV.setText(dimArea);
+                    itemVH.priceTV.setText(String.format(
+                            Locale.US,
+                            "$%.2f",
+                            pi.getTotalPrice()));
+                    break;
+
+                case TOTAL_VIEW:
+                    TotalVH totalVH = (TotalVH) holder;
+                    totalVH.totalTV.setText(String.format(
+                            Locale.US,
+                            "$%.2f",
+                            project.calcTotalPrice()));
+                    break;
+
+                default:
+                    break;
+            }
         }
 
-        private class ItemViewHolder extends RecyclerView.ViewHolder {
-            TextView columnLeftTV;
-            TextView columnRightTV;
+        private class ItemVH extends RecyclerView.ViewHolder {
+            TextView nameTV;
+            TextView dimAreaTV;
+            TextView priceTV;
 
-            ItemViewHolder(final View itemView) {
+            ItemVH(final View itemView) {
                 super(itemView);
-                columnLeftTV = itemView.findViewById(R.id.columnLeftTV);
-                columnRightTV = itemView.findViewById(R.id.columnRightTV);
+                nameTV = itemView.findViewById(R.id.nameTV);
+                dimAreaTV = itemView.findViewById(R.id.dimAreaTV);
+                priceTV = itemView.findViewById(R.id.priceTV);
+
                 itemView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
 
-                        //Inform mListener show project item.
-                        mListener.onProjectFragmentProjectItemClick(projectItems.get(getAdapterPosition()));
+                        //Inform mListener show ic_project item.
+                        mListener.onProjectFragmentProjectItemClick(
+                                project.getProjectItems().get(getAdapterPosition()));
 
                     }
                 });
+            }
+        }
+
+        private class TotalVH extends RecyclerView.ViewHolder {
+            TextView totalTV;
+
+            TotalVH(View itemView) {
+                super(itemView);
+                totalTV = itemView.findViewById(R.id.totalTV);
+            }
+        }
+    }
+
+    //------------------------------- MaterialListAdapter -------------------------------//
+
+    public class MaterialListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+
+        @Override
+        public int getItemCount() {
+            return project.getMaterialList() == null ? 0 : project.getMaterialList().size();
+        }
+
+        @NonNull
+        @Override
+        public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            return new ItemVH(LayoutInflater.from(context).inflate(
+                    R.layout.list_item_textview_textview, parent, false));
+
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+            Material m = project.getMaterialList().get(position);
+            ItemVH itemVH = (ItemVH) holder;
+            if (position % 2 == 0) {
+                itemVH.itemView.setBackgroundColor(getResources().getColor(R.color.lightGray));
+            } else {
+                itemVH.itemView.setBackgroundColor(getResources().getColor(R.color.white));
+            }
+            itemVH.columnLeftTV.setText(m.getName());
+            itemVH.columnRightTV.setText(String.format(
+                    Locale.US,
+                    "%.0f",
+                    m.getQuantity()));
+        }
+
+        private class ItemVH extends RecyclerView.ViewHolder {
+            TextView columnLeftTV;
+            TextView columnRightTV;
+
+            ItemVH(final View itemView) {
+                super(itemView);
+                columnLeftTV = itemView.findViewById(R.id.columnLeftTV);
+                columnRightTV = itemView.findViewById(R.id.columnRightTV);
             }
         }
     }

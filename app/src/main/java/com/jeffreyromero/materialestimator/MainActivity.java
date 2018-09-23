@@ -4,15 +4,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import com.jeffreyromero.materialestimator.data.DefaultDroppedCeilingMaterialList;
 import com.jeffreyromero.materialestimator.data.DefaultDrywallCeilingMaterialList;
@@ -25,13 +22,14 @@ import com.jeffreyromero.materialestimator.models.ProjectItem;
 import com.jeffreyromero.materialestimator.project.ProjectFragment;
 import com.jeffreyromero.materialestimator.project.ProjectItemFragment;
 import com.jeffreyromero.materialestimator.project.ProjectsFragment;
+import com.jeffreyromero.materialestimator.utilities.Helper;
 
 public class MainActivity extends AppCompatActivity implements
         ProjectsFragment.OnItemClickListener,
         ProjectFragment.OnItemClickListener {
 
     private DrawerLayout mDrawerLayout;
-    private Class currentFragment;
+    private String currentFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,10 +60,7 @@ public class MainActivity extends AppCompatActivity implements
                 return;
             }
             ProjectsFragment f = ProjectsFragment.newInstance();
-            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            transaction.add(R.id.fragment_container, f, f.getClass().getSimpleName());
-            transaction.commit();
-            currentFragment = f.getClass();
+            currentFragment = Helper.addFragment(this, f, false);
         }
     }
 
@@ -88,16 +83,18 @@ public class MainActivity extends AppCompatActivity implements
                             case R.id.nav_projects:
                                 ProjectsFragment f = ProjectsFragment.newInstance();
                                 //To avoid overlapping.
-                                if (f.getClass().equals(currentFragment)){
+                                if (f.getClass().getSimpleName().equals(currentFragment)) {
                                     break;
                                 }
-                                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-                                transaction.replace(R.id.fragment_container, f, f.getClass().getSimpleName());
-                                transaction.addToBackStack(null);
-                                transaction.commit();
+                                currentFragment = Helper.replaceFragment(
+                                        MainActivity.this, f, true
+                                );
                                 break;
                             case R.id.nav_material_lists:
-                                Intent intent = new Intent(MainActivity.this, MaterialActivity.class);
+                                Intent intent = new Intent(
+                                        MainActivity.this,
+                                        MaterialActivity.class
+                                );
                                 startActivity(intent);
                                 break;
                         }
@@ -150,22 +147,14 @@ public class MainActivity extends AppCompatActivity implements
     public void onProjectsFragmentItemClick(Project project) {
         //Show the clicked project by loading the Project Fragment.
         ProjectFragment f = ProjectFragment.newInstance(project);
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.fragment_container, f, f.getClass().getSimpleName());
-        transaction.addToBackStack(null);
-        transaction.commit();
-        currentFragment = f.getClass();
+        currentFragment = Helper.replaceFragment(this, f, true);
     }
 
     @Override
     public void onProjectFragmentProjectItemClick(ProjectItem projectItem) {
         //Show the clicked project item by loading the Project item Fragment.
         ProjectItemFragment f = ProjectItemFragment.newInstance(projectItem);
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.fragment_container, f, f.getClass().getSimpleName());
-        transaction.addToBackStack(null);
-        transaction.commit();
-        currentFragment = f.getClass();
+        currentFragment = Helper.replaceFragment(this, f, true);
     }
 
 }

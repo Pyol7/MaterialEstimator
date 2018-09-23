@@ -1,16 +1,22 @@
-package com.jeffreyromero.materialestimator.material;
+package com.jeffreyromero.materialestimator.utilities;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
 import com.jeffreyromero.materialestimator.R;
+
+import static android.content.Context.INPUT_METHOD_SERVICE;
 
 
 public class SingleInputDialog extends DialogFragment {
@@ -56,12 +62,18 @@ public class SingleInputDialog extends DialogFragment {
         // Inflate view
         LayoutInflater inflater = getActivity().getLayoutInflater();
         final View dialogView = inflater.inflate(R.layout.single_input_dialog, null);
+
         // Get the title and placeholder from the bundle.
         String title = getArguments().getString("title");
         String placeholder = getArguments().getString("placeholder");
+
         // Set the placeholder to the inputET.
         final EditText inputET = dialogView.findViewById(R.id.inputET);
+
+        //Show placeholder, select all and open keyboard.
         inputET.setText(placeholder);
+        inputET.selectAll();
+
         //Build dialog
         final AlertDialog.Builder dialog = new AlertDialog.Builder(getActivity());
         dialog.setView(dialogView);
@@ -85,7 +97,18 @@ public class SingleInputDialog extends DialogFragment {
                 //
             }
         });
+
         return dialog.create();
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        //Show keyboard.
+        getDialog().getWindow().setSoftInputMode(
+                WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+        return super.onCreateView(inflater, container, savedInstanceState);
     }
 
     public SingleInputDialog() {

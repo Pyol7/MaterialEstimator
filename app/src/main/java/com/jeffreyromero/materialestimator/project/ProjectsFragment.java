@@ -22,7 +22,7 @@ import java.util.ArrayList;
 
 /**
  * Displays all the projects from shared preferences.
- * Returns the clicked project to the listener.
+ * Returns the clicked ic_project to the listener.
  */
 public class ProjectsFragment extends Fragment implements
         AddProjectDialog.OnCreateListener {
@@ -112,15 +112,16 @@ public class ProjectsFragment extends Fragment implements
     }
 
     @Override
-    public void onAddProjectDialogSubmit(String name, String description) {
+    public void onAddProjectDialogSubmit(String name, String client, String location) {
         Project project = new Project(name);
-        project.setDescription(description);
+        project.setClient(client);
+        project.setLocation(location);
         //Update local list.
         adapter.addProject(project);
         adapter.notifyDataSetChanged();
         //Update stored list.
         dataSource.put(project);
-        //Pass the clicked project to the listener.
+        //Pass the new project to the listener.
         mListener.onProjectsFragmentItemClick(project);
     }
 
@@ -151,8 +152,8 @@ public class ProjectsFragment extends Fragment implements
 
         @Override
         public int getItemCount() {
-            //projects == null ? 0 : projects.size();
-            return projects.size();
+
+            return projects == null ? 0 : projects.size();
         }
 
         @NonNull
@@ -189,7 +190,7 @@ public class ProjectsFragment extends Fragment implements
                     @Override
                     public void onClick(View v) {
 
-                        //Pass the clicked project to the listener.
+                        //Pass the clicked ic_project to the listener.
                         mListener.onProjectsFragmentItemClick(projects.get(getAdapterPosition()));
 
                     }

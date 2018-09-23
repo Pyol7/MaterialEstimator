@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <cache-path name="temp_shared_image"  path="tempSharedImageDir"/>
+</paths>
+<!-- The name attribute is added to the uri (created by fileProvider) to add ambiguity -->
+<!-- The path attribute is a subdirectory of the cache directory -->

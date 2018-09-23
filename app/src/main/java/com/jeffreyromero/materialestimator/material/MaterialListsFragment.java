@@ -76,7 +76,7 @@ public class MaterialListsFragment extends Fragment {
         context = getActivity();
         String json = getArguments().getString("allLists");
         allLists = Deserializer.toArrayListOfMaterialList(json);
-        //Create User Shared Preferences helper.
+        //Create User Shared Preferences Helper.
         dataSource = new MaterialListsDataSource(
                 getString(R.string.user_material_lists),
                 context

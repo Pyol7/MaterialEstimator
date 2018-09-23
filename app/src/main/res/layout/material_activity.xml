@@ -14,7 +14,8 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"/>
+            app:contentInsetStartWithNavigation="0dp"
+            android:theme="@style/ToolBarTheme"/>
 
     </android.support.design.widget.AppBarLayout>
 

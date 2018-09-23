@@ -11,14 +11,19 @@
     <string name="default_drywall_ceiling_material_list">Drywall Ceiling Material List</string>
     <string name="default_drywall_partition_material_list">Drywall Partition Material List</string>
     <string name="default_dropped_ceiling_material_list">Dropped Ceiling Material List</string>
+    <string name="selected_material_list_position">Selected Material List Position</string>
 
     <!--Sample Project-->
     <string name="sample_project">Levy\'s Residence</string>
 
     <!--Menu Items-->
+    <string name="action_screen_shot">Screen Shot</string>
+    <string name="action_help">Help</string>
     <string name="action_add">Add</string>
     <string name="action_save">Save</string>
     <string name="action_material_lists">Material Lists</string>
+    <string name="action_project_item_view">Project items view</string>
+    <string name="action_material_list_view">Material List view</string>
 
     <!--Nav Drawer items-->
     <string name="nav_projects">Projects</string>
@@ -31,35 +36,57 @@
     <string name="projects_empty_view_message">Click the + button to create your first project</string>
 
     <!--ProjectFragment-->
+    <string name="project_date_created_text">Date Created:</string>
+    <string name="project_description_text">Description</string>
     <string name="project_empty_view_title">Add project items</string>
-    <string name="project_empty_view_message1">Click the + button to begin</string>
+    <string name="project_empty_view_message1">
+        Click the + button to add project items.
+    </string>
     <string name="project_empty_view_message2">
         Project items are the things that make up your project,
-        eg. Living Room Ceiling, Drywall Partition etc.</string>
+        eg. Living Room Ceiling, Drywall Partition etc.
+    </string>
 
     <!--AddProjectDialog-->
     <string name="add_project_dialog_title">Create New Project</string>
 
     <!--ProjectItemCreatorFragment-->
-    <string name="projectItemCreator_title">Project Item Creator</string>
-    <string name="projectItemNameTV_hint">Untitled</string>
-    <string name="projectItemListNameTV_hint">Material List</string>
-    <string name="lengthET_hint">Length</string>
-    <string name="widthET_hint">Width</string>
+    <string name="projectItemCreatorFragment_title">Project item creator</string>
+    <string name="projectItemNameTV_text">Project Item Name</string>
+    <string name="projectItemListNameTV_text">Select material list</string>
     <string name="calcBTN_text">Calculate</string>
     <string name="add_name_dialog_title">Add a name</string>
     <string name="select_list_dialog_title">Select a list</string>
-    <string name="total_label">Total</string>
-    <string name="content_description">Press to calculate material quantiry and cost.</string>
-    <string name="quantityUnitPrice_output">%.2fpcs @ %.2f</string>
+    <string name="edit_icon_content_description">Press to calculate material quantity and cost.</string>
+    <string name="select_list_icon_content_description">Press to select a material list.</string>
+    <string name="quantityUnitPrice_format">%.2f pcs  @  %.2f</string>
+    <string name="project_item_empty_view_title">Create project item</string>
+    <string name="project_item_empty_view_message1">(1) Add project item name</string>
+    <string name="project_item_empty_view_message2">(2) Select a material list.</string>
+    <string name="project_item_empty_view_message3">(3) Enter dimensions.</string>
+    <string name="project_item_empty_view_message4">(4) Calculate.</string>
+    <string name="project_item_empty_view_message5">(5) Save.</string>
+    <string name="project_item_empty_view_message6">
+        NOTE: At step(4) you can edit the calculated quantities individually.
+        You can also edit material lists and create new lists by navigating to Manage Lists.
+    </string>
 
     <!--MaterialListsFragment-->
     <string name="material_lists_title">Material Lists</string>
 
-    <!--units-->
+    <!--misc-->
+    <string name="width">Width</string>
+    <string name="length">Length</string>
+    <string name="total">Total</string>
+    <string name="select_material_list">Select Material List</string>
+    <string name="list">List:</string>
+    <string name="name">Name:</string>
+    <string name="untitled">Untitled</string>
+    <string name="double_2dp_format">%.2f</string>
     <string name="min_unit">in</string>
     <string name="max_feet">ft</string>
-
     <string name="title">Title</string>
+    <string name="share">Share</string>
+    <string name="cancel">Cancel</string>
 
 </resources>

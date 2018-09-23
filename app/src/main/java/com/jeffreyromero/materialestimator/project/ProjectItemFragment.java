@@ -96,7 +96,7 @@ public class ProjectItemFragment extends Fragment {
             Material material = projectItem.getMaterialList().get(position);
             ItemViewHolder viewHolder = (ItemViewHolder) holder;
             viewHolder.columnLeftTV.setText(material.getName());
-            viewHolder.columnRightTV.setText(String.valueOf(material.getPrice()));
+            viewHolder.columnRightTV.setText(String.valueOf(material.getQuantity()));
         }
 
         private class ItemViewHolder extends RecyclerView.ViewHolder {

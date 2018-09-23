@@ -7,7 +7,7 @@
             android:title="@string/nav_projects" />
         <item
             android:id="@+id/nav_material_lists"
-            android:icon="@drawable/ic_assignment_white_24dp"
+            android:icon="@drawable/ic_format_list_bulleted_white_24dp"
             android:title="@string/nav_material_lists" />
         <item
             android:id="@+id/nav_trash"

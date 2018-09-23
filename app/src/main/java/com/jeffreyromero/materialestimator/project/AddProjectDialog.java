@@ -5,16 +5,20 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.EditText;
 
 import com.jeffreyromero.materialestimator.R;
 
 
 /**
- * Displays a dialog to create a new project and passes
+ * Displays a dialog to create a new ic_project and passes
  * the name and description back to the hosting fragment.
  */
 public class AddProjectDialog extends DialogFragment {
@@ -30,7 +34,7 @@ public class AddProjectDialog extends DialogFragment {
     }
 
     public interface OnCreateListener {
-        void onAddProjectDialogSubmit(String name, String description);
+        void onAddProjectDialogSubmit(String name, String client, String location);
     }
 
     @Override
@@ -62,12 +66,14 @@ public class AddProjectDialog extends DialogFragment {
 
                 //Get user input.
                 EditText nameET = dialogView.findViewById(R.id.nameET);
-                EditText descriptionET = dialogView.findViewById(R.id.descriptionET);
+                EditText clientET = dialogView.findViewById(R.id.clientET);
+                EditText locationET = dialogView.findViewById(R.id.locationET);
                 String name = nameET.getText().toString();
-                String description = descriptionET.getText().toString();
+                String client = clientET.getText().toString();
+                String location = locationET.getText().toString();
 
-                //Inform the listener of the new project created.
-                mListener.onAddProjectDialogSubmit(name, description);
+                //Inform the listener of the new ic_project created.
+                mListener.onAddProjectDialogSubmit(name, client, location);
 
             }
         });
@@ -79,6 +85,16 @@ public class AddProjectDialog extends DialogFragment {
         });
 
         return dialogBuilder.create();
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        //Show keyboard.
+        getDialog().getWindow().setSoftInputMode(
+                WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+        return super.onCreateView(inflater, container, savedInstanceState);
     }
 
     @Override

@@ -24,6 +24,7 @@ import com.jeffreyromero.materialestimator.data.Deserializer;
 import com.jeffreyromero.materialestimator.data.MaterialListsDataSource;
 import com.jeffreyromero.materialestimator.models.Material;
 import com.jeffreyromero.materialestimator.models.MaterialList;
+import com.jeffreyromero.materialestimator.utilities.SingleInputDialog;
 
 /**
  * Receives a MaterialList and displays it.
@@ -74,7 +75,7 @@ public class MaterialListFragment extends Fragment implements
         // Get the data from bundle and deserialize it.
         String json = getArguments().getString("materialList");
         materialList = Deserializer.toMaterialList(json);
-        //Create User Shared Preferences helper.
+        //Create User Shared Preferences Helper.
         dataSource = new MaterialListsDataSource(
                 getString(R.string.user_material_lists),
                 getActivity()

@@ -75,7 +75,7 @@ public class AddMaterialDialog extends DialogFragment {
 
                 //Update the selected material with user input values.
                 EditText priceET = dialogView.findViewById(R.id.priceET);
-                selectedMaterial.setUnitPrice(Integer.valueOf(priceET.getText().toString()));
+                selectedMaterial.setUnitPrice(Double.valueOf(priceET.getText().toString()));
                 //Send the new selected material to the listener.
                 onItemChangeListener.onAddMaterialDialogSubmit(selectedMaterial);
 

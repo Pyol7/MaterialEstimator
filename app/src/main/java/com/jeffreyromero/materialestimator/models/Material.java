@@ -1,6 +1,10 @@
 package com.jeffreyromero.materialestimator.models;
 
 
+import android.os.Build;
+
+import java.util.Objects;
+
 /**
  * The type field is used by Gson to identify subtypes for deserialization.
  * All subtypes must provide a type and that type must be registered with
@@ -60,7 +64,7 @@ public abstract class Material implements Quantifiable {
         return unitPrice;
     }
 
-    public void setUnitPrice(int unitPrice) {
+    public void setUnitPrice(double unitPrice) {
         this.unitPrice = unitPrice;
         this.price = unitPrice*getQuantity();
     }
@@ -93,6 +97,20 @@ public abstract class Material implements Quantifiable {
     public double getPrice() {
         return price;
     }
+
+    @Override
+    public boolean equals(Object o) {
+//        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Material material = (Material) o;
+
+        return name != null ? name.equals(material.name) : material.name == null;
+    }
+
+    //    String oName = ((Material) o).getName().trim();
+//        String name = this.getName().trim();
+//        return name.equalsIgnoreCase(oName);
 
     @Override
     public String toString() {
