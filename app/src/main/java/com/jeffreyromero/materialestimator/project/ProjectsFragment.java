@@ -1,10 +1,12 @@
 package com.jeffreyromero.materialestimator.project;
 
 import android.content.Context;
+import android.graphics.drawable.TransitionDrawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
+import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -17,6 +19,7 @@ import com.jeffreyromero.materialestimator.utilities.CustomRecyclerView;
 import com.jeffreyromero.materialestimator.R;
 import com.jeffreyromero.materialestimator.data.ProjectsDataSource;
 import com.jeffreyromero.materialestimator.models.Project;
+import com.jeffreyromero.materialestimator.utilities.PrimaryActionModeCallBack;
 
 import java.util.ArrayList;
 
@@ -134,7 +137,9 @@ public class ProjectsFragment extends Fragment implements
     //------------------------------- Adapter -------------------------------//
 
     public class ProjectsAdapter extends RecyclerView.Adapter {
+
         private ArrayList<Project> projects;
+        private ActionMode mActionMode;
 
         ProjectsAdapter(ArrayList<Project> projects) {
             this.projects = projects;
@@ -178,9 +183,12 @@ public class ProjectsFragment extends Fragment implements
             viewHolder.columnRightTV.setText(String.valueOf(project.getDateCreated()));
         }
 
-        private class ItemViewHolder extends RecyclerView.ViewHolder {
+        private class ItemViewHolder extends RecyclerView.ViewHolder implements
+                PrimaryActionModeCallBack.OnActionItemClickListener {
+
             TextView columnLeftTV;
             TextView columnRightTV;
+            TransitionDrawable transition;
 
             ItemViewHolder(final View itemView) {
                 super(itemView);
@@ -195,6 +203,39 @@ public class ProjectsFragment extends Fragment implements
 
                     }
                 });
+
+                itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                    // Called when the user long-clicks
+                    public boolean onLongClick(View view) {
+                        if (mActionMode != null) {
+                            return false;
+                        }
+
+                        // Start the CAB using the ActionMode.Callback and hold on to it's instance
+                        mActionMode = getActivity().startActionMode(
+                                new PrimaryActionModeCallBack(
+                                        ItemViewHolder.this,
+                                        getAdapterPosition()
+                                )
+                        );
+                        transition = (TransitionDrawable) view.getBackground();
+                        transition.startTransition(350);
+                        return true;
+                    }
+                });
+            }
+
+            @Override
+            public void deleteItem(int position) {
+                projects.remove(position);
+                adapter.notifyItemRemoved(position);
+                adapter.notifyItemChanged(getItemCount()-1);
+            }
+
+            @Override
+            public void destroyActionMode() {
+                transition.reverseTransition(350);
+                mActionMode = null;
             }
         }
     }

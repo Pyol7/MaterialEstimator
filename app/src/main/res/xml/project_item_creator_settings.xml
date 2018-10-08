@@ -1,0 +1,76 @@
+<!--suppress ALL -->
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:title="@string/settings_title">
+
+        <com.jeffreyromero.materialestimator.utilities.CustomEditTextPreference
+            android:key="@string/wastage_key"
+            android:title="@string/wastage_title"
+            android:dialogTitle="@string/wastage_title"
+            android:summary="@string/wastage_summary"
+            android:defaultValue="0" />
+
+        <com.jeffreyromero.materialestimator.utilities.CustomEditTextPreference
+            android:key="@string/default_panel_size_key"
+            android:title="@string/screws_per_panel_title"
+            android:dialogTitle="@string/screws_per_panel_title"
+            android:summary="@string/screws_per_panel_summary"
+            android:defaultValue="28" />
+
+        <com.jeffreyromero.materialestimator.utilities.CustomEditTextPreference
+            android:key="@string/screws_per_panel_key"
+            android:title="@string/screws_per_panel_title"
+            android:dialogTitle="@string/screws_per_panel_title"
+            android:defaultValue="28" />
+
+        <com.jeffreyromero.materialestimator.utilities.CustomEditTextPreference
+            android:key="@string/furring_spacing_key"
+            android:title="@string/furring_spacing_title"
+            android:dialogTitle="@string/furring_spacing_title"
+            android:summary="@string/furring_spacing_summary"
+            android:defaultValue="16" />
+
+        <com.jeffreyromero.materialestimator.utilities.CustomEditTextPreference
+            android:key="@string/c_channel_spacing_key"
+            android:title="@string/c_channel_spacing_title"
+            android:dialogTitle="@string/c_channel_spacing_title"
+            android:summary="@string/c_channel_spacing_summary"
+            android:defaultValue="48" />
+
+        <com.jeffreyromero.materialestimator.utilities.CustomEditTextPreference
+            android:key="@string/stud_spacing_key"
+            android:title="@string/stud_spacing_title"
+            android:dialogTitle="@string/stud_spacing_title"
+            android:summary="@string/stud_spacing_summary"
+            android:defaultValue="24" />
+
+        <com.jeffreyromero.materialestimator.utilities.CustomEditTextPreference
+            android:key="@string/setting_type_joint_compound_coverage_area_key"
+            android:title="@string/setting_type_joint_compound_coverage_area_title"
+            android:dialogTitle="@string/setting_type_joint_compound_coverage_area_title"
+            android:summary="@string/setting_type_joint_compound_coverage_area_summary"
+            android:defaultValue="24" />
+
+        <com.jeffreyromero.materialestimator.utilities.CustomEditTextPreference
+            android:key="@string/all_purpose_joint_compound_coverage_area_key"
+            android:title="@string/all_purpose_joint_compound_coverage_area_title"
+            android:dialogTitle="@string/all_purpose_joint_compound_coverage_area_title"
+            android:summary="@string/all_purpose_joint_compound_coverage_area_summary"
+            android:defaultValue="24" />
+
+        <com.jeffreyromero.materialestimator.utilities.CustomEditTextPreference
+            android:key="@string/wire_spacing_key"
+            android:title="@string/wire_spacing_title"
+            android:dialogTitle="@string/wire_spacing_title"
+            android:defaultValue="48" />
+
+        <com.jeffreyromero.materialestimator.utilities.CustomEditTextPreference
+            android:key="@string/average_wire_length_key"
+            android:title="@string/average_wire_length_title"
+            android:dialogTitle="@string/average_wire_length_title"
+            android:summary="@string/average_wire_length_summary"
+            android:defaultValue="48" />
+
+    </PreferenceCategory>
+</PreferenceScreen>

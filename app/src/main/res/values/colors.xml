@@ -6,4 +6,9 @@
     <color name="white">#ffffff</color>
     <color name="lightGray">#EEEEEE</color>
     <color name="colorSecondary">#586cd6</color>
+
+    <!--Used for list item background transition effects-->
+    <drawable name="white">#ffffff</drawable>
+    <drawable name="lightGray">#EEEEEE</drawable>
+    <drawable name="lightBlue">#c6cdf1</drawable>
 </resources>

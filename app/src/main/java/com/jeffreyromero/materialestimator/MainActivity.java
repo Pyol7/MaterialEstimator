@@ -8,17 +8,16 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
-import com.jeffreyromero.materialestimator.data.DefaultDroppedCeilingMaterialList;
-import com.jeffreyromero.materialestimator.data.DefaultDrywallCeilingMaterialList;
-import com.jeffreyromero.materialestimator.data.DefaultDrywallPartitionMaterialList;
-import com.jeffreyromero.materialestimator.data.DefaultMaterialList;
-import com.jeffreyromero.materialestimator.data.MaterialListsDataSource;
-import com.jeffreyromero.materialestimator.material.MaterialActivity;
+import com.jeffreyromero.materialestimator.data.ProjectItemsSharedPreferences;
 import com.jeffreyromero.materialestimator.models.Project;
 import com.jeffreyromero.materialestimator.models.ProjectItem;
+import com.jeffreyromero.materialestimator.models.defaultProjectItems.DroppedCeiling;
+import com.jeffreyromero.materialestimator.models.defaultProjectItems.DrywallCeiling;
+import com.jeffreyromero.materialestimator.models.defaultProjectItems.DrywallPartition;
 import com.jeffreyromero.materialestimator.project.ProjectFragment;
 import com.jeffreyromero.materialestimator.project.ProjectItemFragment;
 import com.jeffreyromero.materialestimator.project.ProjectsFragment;
@@ -28,6 +27,7 @@ public class MainActivity extends AppCompatActivity implements
         ProjectsFragment.OnItemClickListener,
         ProjectFragment.OnItemClickListener {
 
+    private static final double FEET_TO_INCHES = 12;
     private DrawerLayout mDrawerLayout;
     private String currentFragment;
 
@@ -35,6 +35,8 @@ public class MainActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
+
+//        materialTester(16, 14);
 
         //Set the toolbar as the action bar.
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -51,7 +53,7 @@ public class MainActivity extends AppCompatActivity implements
         setupDrawerContent(navigationView);
 
         //On first run initialize data source.
-        initDataSource(this.getApplicationContext());
+        initProjectItemsSharedPreferences(this.getApplicationContext());
 
         //Display Projects fragment.
         if (findViewById(R.id.fragment_container) != null) {
@@ -62,7 +64,18 @@ public class MainActivity extends AppCompatActivity implements
             ProjectsFragment f = ProjectsFragment.newInstance();
             currentFragment = Helper.addFragment(this, f, false);
         }
+
+        // Set default values for ProjectItem specification.
+        // These values are used by Materials to calculate quantities.
+        PreferenceManager.setDefaultValues(this, R.xml.project_item_creator_settings, false);
     }
+
+//    private void materialTester(double dim1, double dim2) {
+//        double length = dim1 * FEET_TO_INCHES;
+//        double width = dim2 * FEET_TO_INCHES;
+//        FurringChannel f = new FurringChannel("Furring Channel", 20.00, 144,16);
+//        f.calcQuantity(length, width);
+//    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -91,11 +104,11 @@ public class MainActivity extends AppCompatActivity implements
                                 );
                                 break;
                             case R.id.nav_material_lists:
-                                Intent intent = new Intent(
-                                        MainActivity.this,
-                                        MaterialActivity.class
-                                );
-                                startActivity(intent);
+//                                Intent intent = new Intent(
+//                                        MainActivity.this,
+//                                        MaterialActivity.class
+//                                );
+//                                startActivity(intent);
                                 break;
                         }
                         // Close the navigation drawer
@@ -108,37 +121,17 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     /**
-     * On first run, create SharedPreferences files and populate with default and sample lists:
-     * <p>
-     * "App SharedPreferences" - Contains three(3) lists:
-     * "Default Material List" - Contains all the materials used to create other lists.
-     * "Sample Ceiling Material List" - Provides a starting point for user lists and can be
-     * modified and restored.
-     * "Sample Partition Material List" - Same as above.
-     * <p>
-     * "User SharedPreferences" - Contains the two sample lists and all user created lists.
+     * On first run, create SharedPreferences files and populate with default project items
      */
-    private void initDataSource(Context context) {
-        //Create and Populate Default material lists Shared Preferences file.
-        MaterialListsDataSource dml = new MaterialListsDataSource(
-                getString(R.string.default_material_lists),
+    private void initProjectItemsSharedPreferences(Context context) {
+        ProjectItemsSharedPreferences sp = new ProjectItemsSharedPreferences(
+                getString(R.string.default_project_items_key),
                 context
         );
-        if (dml.isEmpty()) {
-            dml.put(DefaultMaterialList.getList(context));
-            dml.put(DefaultDrywallCeilingMaterialList.getList(context));
-            dml.put(DefaultDrywallPartitionMaterialList.getList(context));
-            dml.put(DefaultDroppedCeilingMaterialList.getList(context));
-        }
-        //Create and populate User Material Lists with default lists.
-        MaterialListsDataSource uml = new MaterialListsDataSource(
-                getString(R.string.user_material_lists),
-                context
-        );
-        if (uml.isEmpty()) {
-            uml.put(dml.get(context.getString(R.string.default_drywall_ceiling_material_list)));
-            uml.put(dml.get(context.getString(R.string.default_drywall_partition_material_list)));
-            uml.put(dml.get(context.getString(R.string.default_dropped_ceiling_material_list)));
+        if (sp.isEmpty()) {
+            sp.put(new DroppedCeiling(getString(R.string.untitled)));
+            sp.put(new DrywallCeiling(getString(R.string.untitled)));
+            sp.put(new DrywallPartition(getString(R.string.untitled)));
         }
 
     }
@@ -158,3 +151,5 @@ public class MainActivity extends AppCompatActivity implements
     }
 
 }
+
+//Toast.makeText(getActivity(), "Clicked @" + position, Toast.LENGTH_SHORT).show();

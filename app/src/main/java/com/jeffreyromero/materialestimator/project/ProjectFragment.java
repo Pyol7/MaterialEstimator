@@ -1,12 +1,11 @@
 package com.jeffreyromero.materialestimator.project;
 
-
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.TransitionDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -14,7 +13,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.FileProvider;
 import android.support.v4.view.MenuItemCompat;
-import android.support.v7.app.AlertDialog;
+import android.view.ActionMode;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.ShareActionProvider;
 import android.util.Log;
@@ -24,22 +23,22 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.jeffreyromero.materialestimator.R;
 import com.jeffreyromero.materialestimator.data.Deserializer;
 import com.jeffreyromero.materialestimator.data.ProjectsDataSource;
-import com.jeffreyromero.materialestimator.models.Material;
+import com.jeffreyromero.materialestimator.models.BaseMaterial;
 import com.jeffreyromero.materialestimator.models.Project;
 import com.jeffreyromero.materialestimator.models.ProjectItem;
+import com.jeffreyromero.materialestimator.utilities.PrimaryActionModeCallBack;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Locale;
-
 
 /**
  * Receives a Project from the activity and displays it.
@@ -48,6 +47,7 @@ public class ProjectFragment extends Fragment implements
         ProjectItemCreatorFragment.OnFragmentInteractionListener {
 
     private static final String LOG_TAG = ProjectFragment.class.getSimpleName();
+    private static final double INCHES_TO_FEET = 0.0833;
     private static final String PROJECT = "project";
     private ShareActionProvider mShareActionProvider;
     private MaterialListAdapter materialListAdapter;
@@ -91,16 +91,22 @@ public class ProjectFragment extends Fragment implements
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (getArguments() != null) {
-            String json = getArguments().getString(PROJECT);
-            project = Deserializer.toProject(json);
+        if (savedInstanceState == null){
+            // Use the provided project
+            if (getArguments() != null) {
+                String json = getArguments().getString(PROJECT);
+                project = Deserializer.toProject(json);
+            }
+        } else {
+            // Get the project item currently in use from the savedInstanceState bundle
+            project = Deserializer.toProject(savedInstanceState.getString(PROJECT));
         }
 
-        //If project items is empty show ProjectItemCreator.
+        // If project items is empty show ProjectItemCreator.
 //        if (project.getProjectItems().size() == 0) {
 //            showProjectItemCreator();
 //        }
-
+        // Init list adapters
         projectItemAdapter = new ProjectItemAdapter();
         materialListAdapter = new MaterialListAdapter();
     }
@@ -133,17 +139,39 @@ public class ProjectFragment extends Fragment implements
     }
 
     @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(PROJECT, new Gson().toJson(project));
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        // Save altered project to SP
+        ProjectsDataSource pds = new ProjectsDataSource(context);
+        pds.put(project);
+    }
+
+    @Override
     public void onDetach() {
         super.onDetach();
         mListener = null;
     }
 
     @Override
+    public void onProjectItemCreated(ProjectItem projectItem) {
+        //Add the created ProjectItem to the current Project.
+        project.addProjectItem(projectItem);
+        projectItemAdapter.notifyItemInserted(project.getProjectItems().size());
+        //TODO - Create stackOverflow background animation.
+        Toast.makeText(context, "New Item Created", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.project_menu, menu);
-        //Locate MenuItem with ShareActionProvider
-        MenuItem item = menu.findItem(R.id.action_share);
         //Fetch and store ShareActionProvider
+        MenuItem item = menu.findItem(R.id.action_share);
         mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
     }
 
@@ -280,25 +308,12 @@ public class ProjectFragment extends Fragment implements
 
     private void showProjectItemCreator() {
         //Show the ProjectItemCreatorFragment.
-        ProjectItemCreatorFragment f = ProjectItemCreatorFragment.newInstance(project);
+        ProjectItemCreatorFragment f = ProjectItemCreatorFragment.newInstance(project.getName());
         f.setTargetFragment(ProjectFragment.this, 0);
         FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.fragment_container, f, f.getClass().getSimpleName());
         transaction.addToBackStack(f.getClass().getSimpleName());
         transaction.commit();
-    }
-
-    @Override
-    public void onProjectItemCreated(ProjectItem projectItem) {
-        //Add the created ProjectItem to the current Project.
-        project.addProjectItem(projectItem);
-        projectItemAdapter.notifyDataSetChanged();
-//        materialListAdapter.notifyDataSetChanged();
-        //TODO - Create stackOverflow background animation.
-//        Toast.makeText(context, "New Item Created", Toast.LENGTH_SHORT).show();
-        //Save the project to the project data source.
-        ProjectsDataSource pds = new ProjectsDataSource(context);
-        pds.put(project);
     }
 
     //------------------------------- ProjectItemAdapter -------------------------------//
@@ -307,6 +322,7 @@ public class ProjectFragment extends Fragment implements
         //View types
         private final int ITEM_VIEW = 0;
         private final int TOTAL_VIEW = 1;
+        private ActionMode mActionMode;
 
 
         @Override
@@ -350,19 +366,21 @@ public class ProjectFragment extends Fragment implements
                 case ITEM_VIEW:
                     ProjectItem pi = project.getProjectItems().get(position);
                     ItemVH itemVH = (ItemVH) holder;
-                    if (position % 2 == 0) {
-                        itemVH.itemView.setBackgroundColor(getResources().getColor(R.color.lightGray));
-                    } else {
-                        itemVH.itemView.setBackgroundColor(getResources().getColor(R.color.white));
-                    }
+//                    if (position % 2 == 0) {
+//                        itemVH.itemView.setBackground(
+//                                getResources().getDrawable(R.drawable.light_gray_to_light_blue));
+//                    } else {
+//                        itemVH.itemView.setBackground(
+//                                getResources().getDrawable(R.drawable.white_to_light_blue));
+//                    }
                     itemVH.nameTV.setText(pi.getName());
                     double area = pi.getLength() * pi.getWidth();
                     String dimArea = String.format(
                             Locale.US,
-                            "%.0fft x %.0fft  (%.0fft2)",
-                            pi.getLength(),
-                            pi.getWidth(),
-                            area);
+                            "%.1fft x %.1fft  (%.0fft2)",
+                            pi.getLength() * INCHES_TO_FEET,
+                            pi.getWidth() * INCHES_TO_FEET,
+                            area * INCHES_TO_FEET);
                     itemVH.dimAreaTV.setText(dimArea);
                     itemVH.priceTV.setText(String.format(
                             Locale.US,
@@ -383,14 +401,17 @@ public class ProjectFragment extends Fragment implements
             }
         }
 
-        private class ItemVH extends RecyclerView.ViewHolder {
+        private class ItemVH extends RecyclerView.ViewHolder implements
+                PrimaryActionModeCallBack.OnActionItemClickListener {
+
             TextView nameTV;
             TextView dimAreaTV;
             TextView priceTV;
+            TransitionDrawable transition;
 
             ItemVH(final View itemView) {
                 super(itemView);
-                nameTV = itemView.findViewById(R.id.nameTV);
+                nameTV = itemView.findViewById(R.id.nameLabelTV);
                 dimAreaTV = itemView.findViewById(R.id.dimAreaTV);
                 priceTV = itemView.findViewById(R.id.priceTV);
 
@@ -404,6 +425,39 @@ public class ProjectFragment extends Fragment implements
 
                     }
                 });
+
+                itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                    // Called when the user long-clicks
+                    public boolean onLongClick(View view) {
+                        if (mActionMode != null) {
+                            return false;
+                        }
+
+                        // Start the CAB using the ActionMode.Callback and hold on to it's instance
+                        mActionMode = getActivity().startActionMode(
+                                new PrimaryActionModeCallBack(
+                                        ItemVH.this,
+                                        getAdapterPosition()
+                                )
+                        );
+                        transition = (TransitionDrawable) view.getBackground();
+                        transition.startTransition(350);
+                        return true;
+                    }
+                });
+            }
+
+            @Override
+            public void deleteItem(int position) {
+                project.deleteProjectItem(position);
+                projectItemAdapter.notifyItemRemoved(position);
+                projectItemAdapter.notifyItemChanged(getItemCount()-1);
+            }
+
+            @Override
+            public void destroyActionMode() {
+                transition.reverseTransition(350);
+                mActionMode = null;
             }
         }
 
@@ -436,7 +490,7 @@ public class ProjectFragment extends Fragment implements
 
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-            Material m = project.getMaterialList().get(position);
+            BaseMaterial m = project.getMaterialList().get(position);
             ItemVH itemVH = (ItemVH) holder;
             if (position % 2 == 0) {
                 itemVH.itemView.setBackgroundColor(getResources().getColor(R.color.lightGray));
@@ -446,7 +500,7 @@ public class ProjectFragment extends Fragment implements
             itemVH.columnLeftTV.setText(m.getName());
             itemVH.columnRightTV.setText(String.format(
                     Locale.US,
-                    "%.0f",
+                    "%.1f",
                     m.getQuantity()));
         }
 

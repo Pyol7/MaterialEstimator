@@ -26,7 +26,7 @@ public class ProjectsDataSource implements DataSource<Project> {
 
     public ProjectsDataSource(Context context) {
         this.spInstance = context.getSharedPreferences(
-                context.getString(R.string.projects_list),
+                context.getString(R.string.projects_key),
                 0
         );
     }

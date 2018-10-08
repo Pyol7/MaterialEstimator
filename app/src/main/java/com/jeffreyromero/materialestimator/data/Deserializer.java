@@ -3,23 +3,29 @@ package com.jeffreyromero.materialestimator.data;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import com.jeffreyromero.materialestimator.models.BaseMaterial;
 import com.jeffreyromero.materialestimator.models.Project;
 import com.jeffreyromero.materialestimator.models.ProjectItem;
+import com.jeffreyromero.materialestimator.models.defaultProjectItems.DroppedCeiling;
+import com.jeffreyromero.materialestimator.models.defaultProjectItems.DrywallCeiling;
+import com.jeffreyromero.materialestimator.models.defaultProjectItems.DrywallPartition;
 import com.jeffreyromero.materialestimator.models.droppedCeiling.CeilingTile;
 import com.jeffreyromero.materialestimator.models.droppedCeiling.CrossTeeLong;
 import com.jeffreyromero.materialestimator.models.droppedCeiling.CrossTeeShort;
 import com.jeffreyromero.materialestimator.models.droppedCeiling.MainTee;
-import com.jeffreyromero.materialestimator.models.drywall.CChannel;
-import com.jeffreyromero.materialestimator.models.drywall.DrywallScrew;
-import com.jeffreyromero.materialestimator.models.drywall.FramingScrew;
-import com.jeffreyromero.materialestimator.models.drywall.FurringChannel;
-import com.jeffreyromero.materialestimator.models.drywall.WallAngle;
-import com.jeffreyromero.materialestimator.models.drywall.Stud;
-import com.jeffreyromero.materialestimator.models.drywall.Track;
-import com.jeffreyromero.materialestimator.models.drywall.JointCompoundAllPurpose;
-import com.jeffreyromero.materialestimator.models.drywall.JointCompoundSettingType;
-import com.jeffreyromero.materialestimator.models.drywall.Panel;
-import com.jeffreyromero.materialestimator.models.Material;
+import com.jeffreyromero.materialestimator.models.drywall.fasteners.FramingFastener;
+import com.jeffreyromero.materialestimator.models.drywall.fasteners.MainChannelFastener;
+import com.jeffreyromero.materialestimator.models.drywall.fasteners.PanelFastener;
+import com.jeffreyromero.materialestimator.models.drywall.fasteners.TrackFastener;
+import com.jeffreyromero.materialestimator.models.drywall.materials.FurringChannel;
+import com.jeffreyromero.materialestimator.models.drywall.materials.Hanger;
+import com.jeffreyromero.materialestimator.models.drywall.materials.MainChannel;
+import com.jeffreyromero.materialestimator.models.drywall.materials.JointCompound;
+import com.jeffreyromero.materialestimator.models.drywall.fasteners.WallAngleFastener;
+import com.jeffreyromero.materialestimator.models.drywall.materials.WallAngle;
+import com.jeffreyromero.materialestimator.models.drywall.materials.Stud;
+import com.jeffreyromero.materialestimator.models.drywall.materials.Track;
+import com.jeffreyromero.materialestimator.models.drywall.materials.Panel;
 import com.jeffreyromero.materialestimator.models.MaterialList;
 
 import java.lang.reflect.Type;
@@ -40,29 +46,38 @@ public class Deserializer {
     private static Gson gson;
 
     static {
-        GsonRuntimeTypeAdapterFactory<Material> MaterialTypeAdapter = GsonRuntimeTypeAdapterFactory
-                .of(Material.class, "type")
-                .registerSubtype(Panel.class,"Panel")
-
-                .registerSubtype(CChannel.class, "CChannel")
-                .registerSubtype(FurringChannel.class, "FurringChannel")
-                .registerSubtype(WallAngle.class, "WallAngle")
-
+        // BaseMaterial
+        GsonRuntimeTypeAdapterFactory<BaseMaterial> BaseMaterialTypeAdapter = GsonRuntimeTypeAdapterFactory
+                .of(BaseMaterial.class, "type")
+                .registerSubtype(WallAngle.class, "Wall Angle")
+                .registerSubtype(WallAngleFastener.class, "Wall Angle Fastener")
+                .registerSubtype(Hanger.class, "Hanger")
+                .registerSubtype(MainChannel.class, "Main Channel")
+                .registerSubtype(MainChannelFastener.class, "Main Channel Fastener")
+                .registerSubtype(FurringChannel.class, "Furring Channel")
+                .registerSubtype(FramingFastener.class, "Framing Fastener")
                 .registerSubtype(Stud.class, "Stud")
                 .registerSubtype(Track.class, "Track")
+                .registerSubtype(TrackFastener.class, "Track Fastener")
+                .registerSubtype(Panel.class,"Panel")
+                .registerSubtype(PanelFastener.class, "Panel Fastener")
+                .registerSubtype(JointCompound.class, "Joint Compound")
+                .registerSubtype(CeilingTile.class,"Ceiling Tile")
+                .registerSubtype(MainTee.class,"Main Tee")
+                .registerSubtype(CrossTeeLong.class,"Cross Tee Long")
+                .registerSubtype(CrossTeeShort.class,"Cross Tee Short");
 
-                .registerSubtype(DrywallScrew.class, "DrywallScrew")
-                .registerSubtype(FramingScrew.class, "FramingScrew")
+        // ProjectItem
+        GsonRuntimeTypeAdapterFactory<ProjectItem> ProjectItemTypeAdapter = GsonRuntimeTypeAdapterFactory
+                .of(ProjectItem.class, "type")
+                .registerSubtype(DroppedCeiling.class, "Dropped Ceiling")
+                .registerSubtype(DrywallCeiling.class, "Drywall Ceiling")
+                .registerSubtype(DrywallPartition.class, "Drywall Partition");
 
-                .registerSubtype(JointCompoundAllPurpose.class, "JointCompoundAllPurpose")
-                .registerSubtype(JointCompoundSettingType.class, "JointCompoundSettingType")
-
-                .registerSubtype(CeilingTile.class,"CeilingTile")
-                .registerSubtype(MainTee.class,"MainTee")
-                .registerSubtype(CrossTeeLong.class,"CrossTeeLong")
-                .registerSubtype(CrossTeeShort.class,"CrossTeeShort");
-
-        gson = new GsonBuilder().registerTypeAdapterFactory(MaterialTypeAdapter).create();
+        gson = new GsonBuilder()
+                .registerTypeAdapterFactory(BaseMaterialTypeAdapter)
+                .registerTypeAdapterFactory(ProjectItemTypeAdapter)
+                .create();
     }
 
     public static ArrayList<MaterialList> toArrayListOfMaterialList(String json) {
@@ -74,8 +89,8 @@ public class Deserializer {
         return gson.fromJson(json, MaterialList.class);
     }
 
-    public static Material toMaterial(String json) {
-        return gson.fromJson(json, Material.class);
+    public static BaseMaterial toMaterial(String json) {
+        return gson.fromJson(json, BaseMaterial.class);
     }
 
     public static ArrayList<Project> toProjects(String json) {
@@ -89,6 +104,11 @@ public class Deserializer {
 
     public static ProjectItem toProjectItem(String json) {
         return gson.fromJson(json, ProjectItem.class);
+    }
+
+    public static ArrayList<ProjectItem> toProjectItems(String json) {
+        Type type = new TypeToken<ArrayList<ProjectItem>>(){}.getType();
+        return gson.fromJson(json, type);
     }
 
 }

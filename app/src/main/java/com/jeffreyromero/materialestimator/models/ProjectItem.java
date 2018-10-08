@@ -1,20 +1,25 @@
 package com.jeffreyromero.materialestimator.models;
 
-public class ProjectItem {
-    private String name;
-    private double length;
-    private double width;
-    private double totalPrice;
-    private MaterialList materialList;
+import org.apache.commons.lang3.StringUtils;
 
-    public ProjectItem(String name) {
+public class ProjectItem{
+    private String type;
+    private MaterialList materialList;
+    private double totalPrice;
+    protected double length;
+    protected double width;
+    protected String name;
+
+    protected ProjectItem(String type, String name) {
+        this.type = type;
         this.name = name;
     }
 
-    public ProjectItem(String name, double length, double width, MaterialList materialList) {
-        this.name = name;
-        this.length = length;
-        this.width = width;
+    public MaterialList getMaterialList() {
+        return materialList;
+    }
+
+    protected void setMaterialList(MaterialList materialList) {
         this.materialList = materialList;
     }
 
@@ -42,14 +47,6 @@ public class ProjectItem {
         this.width = width;
     }
 
-    public MaterialList getMaterialList() {
-        return materialList;
-    }
-
-    public void setMaterialList(MaterialList materialList) {
-        this.materialList = materialList;
-    }
-
     public double getTotalPrice() {
         return totalPrice;
     }
@@ -57,7 +54,7 @@ public class ProjectItem {
     public double calcTotalPrice() {
         //Sum price from every material in the list.
         double total = 0;
-        for (Material material : materialList.getList() ) {
+        for (BaseMaterial material : materialList.getList() ) {
             total += material.getPrice();
         }
         this.totalPrice = total;
@@ -69,4 +66,10 @@ public class ProjectItem {
         return name;
     }
 
+    protected String generateNameFromClassName(){
+        return StringUtils.join(
+                StringUtils.splitByCharacterTypeCamelCase( getClass().getSimpleName()),
+                ' '
+        );
+    }
 }

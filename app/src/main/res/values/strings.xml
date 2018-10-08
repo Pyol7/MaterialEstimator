@@ -2,28 +2,70 @@
     <string name="app_name">Material Estimator</string>
 
     <!--SharedPreferences File names-->
-    <string name="default_material_lists">Default Material Lists</string>
-    <string name="user_material_lists">User Material Lists</string>
-    <string name="projects_list">Projects List</string>
+    <string name="default_project_items_key">Default Project Items</string>
+    <string name="projects_key">Projects</string>
 
-    <!--Default Material Lists Names-->
-    <string name="default_material_list">Default Material List</string>
-    <string name="default_drywall_ceiling_material_list">Drywall Ceiling Material List</string>
-    <string name="default_drywall_partition_material_list">Drywall Partition Material List</string>
-    <string name="default_dropped_ceiling_material_list">Dropped Ceiling Material List</string>
-    <string name="selected_material_list_position">Selected Material List Position</string>
+    <!-- Default project items -->
+    <string name="dropped_ceiling_key">Dropped Ceiling</string>
+    <string name="drywall_ceiling_key">Drywall Ceiling</string>
+    <string name="drywall_partition_key">Drywall Partition</string>
+    <string name="selected_project_item_position_key">Selected Project Item Position</string>
 
     <!--Sample Project-->
     <string name="sample_project">Levy\'s Residence</string>
 
     <!--Menu Items-->
+    <string name="action_settings">Settings</string>
     <string name="action_screen_shot">Screen Shot</string>
     <string name="action_help">Help</string>
     <string name="action_add">Add</string>
     <string name="action_save">Save</string>
     <string name="action_material_lists">Material Lists</string>
+    <string name="action_views">Views</string>
     <string name="action_project_item_view">Project items view</string>
     <string name="action_material_list_view">Material List view</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+
+    <string name="wastage_key" translatable="false">Wastage</string>
+    <string name="wastage_title">Wastage</string>
+    <string name="wastage_summary">The percentage of unusable left over material</string>
+
+    <string name="default_panel_size_key" translatable="false">Default panel size</string>
+    <string name="default_panel_size_title">Default panel size</string>
+    <string name="default_panel_size_summary">Used together with "Screws per panel" to calculate Drywall screws quantity</string>
+
+    <string name="screws_per_panel_key" translatable="false">Screws per panel</string>
+    <string name="screws_per_panel_title">Screws per panel</string>
+    <string name="screws_per_panel_summary">Enter number of screws per panel</string>
+
+    <string name="furring_spacing_key" translatable="false">Furring channel spacing</string>
+    <string name="furring_spacing_title">Furring channel spacing</string>
+    <string name="furring_spacing_summary">The distance between furring channels</string>
+
+    <string name="c_channel_spacing_key" translatable="false">C channel spacing</string>
+    <string name="c_channel_spacing_title">"C" channel spacing</string>
+    <string name="c_channel_spacing_summary">The distance between "C" channels</string>
+
+    <string name="stud_spacing_key" translatable="false">Stud spacing</string>
+    <string name="stud_spacing_title">Stud spacing</string>
+    <string name="stud_spacing_summary">The distance between wall studs</string>
+
+    <string name="setting_type_joint_compound_coverage_area_key" translatable="false">Setting type joint compound coverage area</string>
+    <string name="setting_type_joint_compound_coverage_area_title">Setting type joint compound coverage area</string>
+    <string name="setting_type_joint_compound_coverage_area_summary">How much sq.ft. (or m2) would one 18ib bag cover</string>
+
+    <string name="all_purpose_joint_compound_coverage_area_key" translatable="false">All Purpose joint compound coverage area</string>
+    <string name="all_purpose_joint_compound_coverage_area_title">All Purpose joint compound coverage area</string>
+    <string name="all_purpose_joint_compound_coverage_area_summary">How much sq.ft. (or m2) would one 4.5gal. pail cover</string>
+
+    <string name="wire_spacing_key" translatable="false">Wire spacing</string>
+    <string name="wire_spacing_title">Wire spacing</string>
+
+    <string name="average_wire_length_key" translatable="false">Average wire length</string>
+    <string name="average_wire_length_title">Average wire length</string>
+    <string name="average_wire_length_summary">The average distance from ceiling to support</string>
 
     <!--Nav Drawer items-->
     <string name="nav_projects">Projects</string>
@@ -56,7 +98,7 @@
     <string name="projectItemListNameTV_text">Select material list</string>
     <string name="calcBTN_text">Calculate</string>
     <string name="add_name_dialog_title">Add a name</string>
-    <string name="select_list_dialog_title">Select a list</string>
+    <string name="select_project_item_type_dialog_title">Select an type</string>
     <string name="edit_icon_content_description">Press to calculate material quantity and cost.</string>
     <string name="select_list_icon_content_description">Press to select a material list.</string>
     <string name="quantityUnitPrice_format">%.2f pcs  @  %.2f</string>
@@ -88,5 +130,6 @@
     <string name="title">Title</string>
     <string name="share">Share</string>
     <string name="cancel">Cancel</string>
+    <string name="context_delete">Delete</string>
 
 </resources>

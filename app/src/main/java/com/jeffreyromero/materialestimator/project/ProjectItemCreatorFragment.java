@@ -22,12 +22,15 @@ import android.widget.Toast;
 import com.google.gson.Gson;
 import com.jeffreyromero.materialestimator.R;
 import com.jeffreyromero.materialestimator.data.Deserializer;
-import com.jeffreyromero.materialestimator.data.MaterialListsDataSource;
+import com.jeffreyromero.materialestimator.data.ProjectItemsSharedPreferences;
 import com.jeffreyromero.materialestimator.material.SingleSelectDialog;
-import com.jeffreyromero.materialestimator.models.Material;
+import com.jeffreyromero.materialestimator.models.BaseMaterial;
 import com.jeffreyromero.materialestimator.models.MaterialList;
 import com.jeffreyromero.materialestimator.models.Project;
 import com.jeffreyromero.materialestimator.models.ProjectItem;
+import com.jeffreyromero.materialestimator.models.defaultProjectItems.DroppedCeiling;
+import com.jeffreyromero.materialestimator.models.defaultProjectItems.DrywallCeiling;
+import com.jeffreyromero.materialestimator.models.defaultProjectItems.DrywallPartition;
 import com.jeffreyromero.materialestimator.utilities.SingleInputDialog;
 
 import java.util.ArrayList;
@@ -41,31 +44,29 @@ public class ProjectItemCreatorFragment extends Fragment implements
         SingleSelectDialog.OnDialogSubmitListener,
         SingleInputDialog.OnDialogSubmitListener {
 
-    private static final String PROJECT = "project";
+    private static final double FEET_TO_INCHES = 12;
+    private static final String PROJECT_NAME = "projectName";
+    private static final String PROJECT_ITEM = "projectItem";
+    private ProjectItemsSharedPreferences projectItemsSP;
     private OnFragmentInteractionListener mListener;
-    private MaterialListsDataSource userMaterialListsDataSource;
-    private ArrayList<MaterialList> userMaterialLists;
-    private int selectedMaterialListPosition;
+    private int selectedProjectItemPosition;
     private SharedPreferences activitySP;
     private ProjectItemAdapter adapter;
-    private TextView projectItemNameTV;
-    private TextView projectItemListNameTV;
+    private RecyclerView recyclerView;
     private ProjectItem projectItem;
     private TextView lengthET;
     private TextView widthET;
-    private Project project;
-    private View view;
     private Context context;
+    private View view;
 
     public ProjectItemCreatorFragment() {
         // Required empty public constructor
     }
 
-    public static ProjectItemCreatorFragment newInstance(Project project) {
+    public static ProjectItemCreatorFragment newInstance(String projectName) {
         ProjectItemCreatorFragment fragment = new ProjectItemCreatorFragment();
         Bundle args = new Bundle();
-        String json = new Gson().toJson(project);
-        args.putString(PROJECT, json);
+        args.putString(PROJECT_NAME, projectName);
         fragment.setArguments(args);
         return fragment;
     }
@@ -92,32 +93,26 @@ public class ProjectItemCreatorFragment extends Fragment implements
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (getArguments() != null) {
-            String json = getArguments().getString(PROJECT);
-            project = Deserializer.toProject(json);
-        }
-
-        //Load User material list data source.
-        userMaterialListsDataSource =
-                new MaterialListsDataSource(getString(R.string.user_material_lists), context);
-
-        //Get all user materialLists.
-        userMaterialLists = userMaterialListsDataSource.getAll();
-
-        //Get activity shared preferences.
-        activitySP = getActivity().getPreferences(Context.MODE_PRIVATE);
-
-        //Get the stored list position or use the first list.
-        selectedMaterialListPosition = activitySP.getInt(
-                context.getString(R.string.selected_material_list_position),
-                0
+        // Init project item shared preferences
+        projectItemsSP = new ProjectItemsSharedPreferences(
+                getString(R.string.default_project_items_key),
+                context
         );
 
-        //Create a ProjectItem.
-        projectItem = new ProjectItem(getString(R.string.projectItemNameTV_text));
+        //Init main activity shared preferences.
+        activitySP = getActivity().getPreferences(Context.MODE_PRIVATE);
 
-        //Set list to project item.
-        projectItem.setMaterialList(userMaterialLists.get(selectedMaterialListPosition));
+        if (savedInstanceState == null){
+            // Use the stored project item or the one at position zero
+            selectedProjectItemPosition = activitySP.getInt(
+                    context.getString(R.string.selected_project_item_position_key),
+                    0
+            );
+            projectItem = projectItemsSP.get(selectedProjectItemPosition);
+        } else {
+            // Get the project item currently in use from the savedInstanceState bundle
+            projectItem = Deserializer.toProjectItem(savedInstanceState.getString(PROJECT_ITEM));
+        }
 
         //Instantiate the adapter.
         adapter = new ProjectItemAdapter();
@@ -141,39 +136,42 @@ public class ProjectItemCreatorFragment extends Fragment implements
 //        actionBar.setTitle(project.getName());
 //        actionBar.setSubtitle(getString(R.string.projectItemCreatorFragment_title));
 
-        getActivity().setTitle(project.getName());
-
-        //Show help message if there is no project items in project.
-        if (project.getProjectItems().size() == 0) {
-            showAddProjectItemMessageDialog();
+        if (getArguments() != null) {
+            getActivity().setTitle(getArguments().getString(PROJECT_NAME));
         }
 
+        //Show help message if there is no project items in project.
+//        if (project.getProjectItems().size() == 0) {
+//            showAddProjectItemMessageDialog();
+//        }
+
         //Set project item name and click listener.
-        projectItemNameTV = view.findViewById(R.id.projectItemNameTV);
+        TextView projectItemNameTV = view.findViewById(R.id.projectItemNameTV);
         projectItemNameTV.setText(projectItem.getName());
         projectItemNameTV.setOnClickListener(new showAddNameDialog());
-        View projectItemNameIcon = view.findViewById(R.id.projectItemNameIcon);
-        projectItemNameIcon.setOnClickListener(new showAddNameDialog());
 
         //Set the current list name and click listener.
-        projectItemListNameTV = view.findViewById(R.id.projectItemListNameTV);
+        TextView projectItemListNameTV = view.findViewById(R.id.projectItemListNameTV);
         projectItemListNameTV.setText(projectItem.getMaterialList().getName());
-        projectItemListNameTV.setOnClickListener(new showMaterialListSelectDialog());
-        View projectItemListNameIcon = view.findViewById(R.id.projectItemListNameIcon);
-        projectItemListNameIcon.setOnClickListener(new showMaterialListSelectDialog());
+        projectItemListNameTV.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showProjectItemSelectDialog();
+            }
+        });
 
         //Display the current project item list.
-        RecyclerView rv = view.findViewById(R.id.recyclerView);
-        rv.setHasFixedSize(true);
-        rv.setAdapter(adapter);
-        rv.setLayoutManager(new LinearLayoutManager(context));
+        recyclerView = view.findViewById(R.id.recyclerView);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setAdapter(adapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(context));
 
         //Calculate quantities based on user input.
         Button btn = view.findViewById(R.id.calcBTN);
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //Get user inputs.
+                //Get user inputs views.
                 lengthET = view.findViewById(R.id.lengthTV);
                 widthET = view.findViewById(R.id.widthTV);
                 //Check the length of the input text to determine if its empty.
@@ -181,7 +179,7 @@ public class ProjectItemCreatorFragment extends Fragment implements
                 int widthSize = widthET.getText().toString().trim().length();
                 if (lengthSize != 0 && widthSize != 0) {
 
-                    calculateQuantities(view);
+                    calculateQuantities();
 
                 } else {
                     //todo - change to snack bar.
@@ -193,20 +191,35 @@ public class ProjectItemCreatorFragment extends Fragment implements
         return view;
     }
 
-    private void calculateQuantities(View view) {
-        //Get inputs.
-        double length = Double.valueOf(lengthET.getText().toString());
-        double width = Double.valueOf(widthET.getText().toString());
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(PROJECT_ITEM, new Gson().toJson(projectItem));
+    }
 
-        //Build the project item.
-        projectItem.setLength(length);
-        projectItem.setWidth(width);
+    private void calculateQuantities() {
+        //Get inputs.
+        double length =
+                Double.valueOf(lengthET.getText().toString()) * FEET_TO_INCHES;
+        double width =
+                Double.valueOf(widthET.getText().toString()) * FEET_TO_INCHES;
 
         //Calculate quantities.
-        projectItem.getMaterialList().calculateQuantities(length, width);
+        if (projectItem.getMaterialList().getName().equals("Dropped Ceiling")) {
+            DroppedCeiling droppedCeiling = (DroppedCeiling) projectItem;
+            droppedCeiling.calcQuantities(length, width);
+        } else if (projectItem.getMaterialList().getName().equals("Drywall Ceiling")) {
+            DrywallCeiling drywallCeiling = (DrywallCeiling) projectItem;
+            drywallCeiling.calcQuantities(length, width);
+        } else if (projectItem.getMaterialList().getName().equals("Drywall Partition")) {
+            DrywallPartition drywallPartition = (DrywallPartition) projectItem;
+            drywallPartition.calcQuantities(length, width);
+        }
 
         //Update adapter
         adapter.notifyDataSetChanged();
+        recyclerView.scrollToPosition(adapter.getItemCount()-1);
+
 
         //Close keyboard and clear focus from inputs.
         InputMethodManager imm = (InputMethodManager) getActivity()
@@ -217,100 +230,89 @@ public class ProjectItemCreatorFragment extends Fragment implements
         widthET.clearFocus();
     }
 
+    private void showProjectItemSelectDialog (){
+        SingleSelectDialog f = SingleSelectDialog.newInstance(
+                getString(R.string.select_project_item_type_dialog_title),
+                projectItemsSP.getAllKeys(),
+                selectedProjectItemPosition
+        );
+        f.setTargetFragment(ProjectItemCreatorFragment.this, 0);
+        f.show(getActivity().getSupportFragmentManager(), f.getClass().getSimpleName());
+    }
+
     private void showAddProjectItemMessageDialog() {
         //Create and show dialog.
         AddProjectItemMessageDialog f = AddProjectItemMessageDialog.newInstance();
         f.show(getActivity().getSupportFragmentManager(), f.getClass().getSimpleName());
     }
 
-    //Uses SingleInputDialog
     private class showAddNameDialog implements View.OnClickListener {
         @Override
         public void onClick(View v) {
-            //Open single input dialog to update name.
-            SingleInputDialog f = SingleInputDialog.newInstance(getString(R.string.add_name_dialog_title), projectItem.getName());
-            // Set target fragment
-            f.setTargetFragment(ProjectItemCreatorFragment.this, 0);
-            // Show fragment
-            f.show(getActivity().getSupportFragmentManager(), f.getClass().getSimpleName());
-        }
-    }
-
-    @Override
-    public void OnSingleInputDialogSubmit(String userInput) {
-        projectItem.setName(userInput);
-        projectItemNameTV.setText(userInput);
-    }
-
-    private class showMaterialListSelectDialog implements View.OnClickListener {
-        @Override
-        public void onClick(View v) {
-            //Show select dialog with all userMaterialLists.
-            SingleSelectDialog f = SingleSelectDialog.newInstance(
-                    getString(R.string.select_list_dialog_title),
-                    userMaterialListsDataSource.getAllKeys(),
-                    selectedMaterialListPosition
+            SingleInputDialog f = SingleInputDialog.newInstance(
+                    getString(R.string.add_name_dialog_title),
+                    projectItem.getName()
             );
-            // Set the target fragment for this dialog.
             f.setTargetFragment(ProjectItemCreatorFragment.this, 0);
             f.show(getActivity().getSupportFragmentManager(), f.getClass().getSimpleName());
         }
     }
 
     @Override
-    public void OnSingleSelectDialogSubmit(int selectedMaterialListPosition) {
-        this.selectedMaterialListPosition = selectedMaterialListPosition;
-        //Store the selected position to activity SP.
+    public void OnSingleInputDialogSubmit(String newName) {
+        projectItem.setName(newName);
+        TextView projectItemNameTV = view.findViewById(R.id.projectItemNameTV);
+        projectItemNameTV.setText(newName);
+    }
+
+    @Override
+    public void OnSingleSelectDialogSubmit(int selectedProjectItemPosition) {
+        this.selectedProjectItemPosition = selectedProjectItemPosition;
+        // Store the selected position to activity SP.
         activitySP.edit().putInt(
-                getString(R.string.selected_material_list_position),
-                selectedMaterialListPosition
+                getString(R.string.selected_project_item_position_key),
+                selectedProjectItemPosition
         ).apply();
-        projectItem.setMaterialList(userMaterialLists.get(selectedMaterialListPosition));
-        projectItemListNameTV.setText(projectItem.getMaterialList().getName());
+        ProjectItem selectedProjectItem = projectItemsSP.get(selectedProjectItemPosition);
+        // Keep user provided name
+        selectedProjectItem.setName(projectItem.getName());
+        projectItem = selectedProjectItem;
         adapter.notifyDataSetChanged();
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        //Reload all userMaterialLists just in case the user made changes.
-        userMaterialLists = userMaterialListsDataSource.getAll();
-    }
-
-    @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        //Create the help menu item.
-        MenuItem help = menu.add(Menu.NONE, R.id.action_save, 1, R.string.action_save);
-        help.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-        help.setIcon(R.drawable.ic_save_white_24dp);
-
-        //Create the save menu item.
-        MenuItem save = menu.add(Menu.NONE, R.id.action_help, 2, R.string.action_help);
-        save.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-        save.setIcon(R.drawable.ic_help_outline_white_24dp);
+        inflater.inflate(R.menu.project_item_creator_menu, menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_save:
-
                 saveProjectItem();
                 return true;
-
+            case R.id.action_settings:
+                showSettingsDialog();
+                return true;
             case R.id.action_help:
-
                 showAddProjectItemMessageDialog();
                 return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
+    private void showSettingsDialog() {
+        getActivity().getSupportFragmentManager().beginTransaction().
+                replace(R.id.fragment_container, new ProjectItemCreatorSettingsFragment()).
+                addToBackStack(null).
+                commit();
+    }
+
     private void saveProjectItem() {
         //Ensure that a project item has a name before saving.
         TextView projectItemNameTV = view.findViewById(R.id.projectItemNameTV);
         String projectItemName = projectItemNameTV.getText().toString();
-        if (!projectItemName.equals(getString(R.string.projectItemNameTV_text))) {
+        if (!projectItemName.equals(getString(R.string.untitled))) {
             //Pass the created ProjectItem to the hosting fragment.
             mListener.onProjectItemCreated(projectItem);
             //Redirect back to hosting fragment.
@@ -369,7 +371,7 @@ public class ProjectItemCreatorFragment extends Fragment implements
             switch (holder.getItemViewType()) {
 
                 case ITEM_VIEW:
-                    Material material = projectItem.getMaterialList().get(position);
+                    BaseMaterial material = projectItem.getMaterialList().get(position);
                     ItemVH itemVH = (ItemVH) holder;
                     if (position % 2 == 0) {
                         itemVH.itemView.setBackgroundColor(getResources().getColor(R.color.lightGray));
@@ -379,7 +381,7 @@ public class ProjectItemCreatorFragment extends Fragment implements
                     itemVH.nameTV.setText(material.toString());
                     String qup = String.format(
                             Locale.US,
-                            "%.0f pcs   @   $%.2f",
+                            "%.1f pcs   @   $%.2f",
                             material.getQuantity(),
                             material.getUnitPrice());
                     itemVH.quantityUnitPriceTV.setText(qup);
@@ -409,7 +411,7 @@ public class ProjectItemCreatorFragment extends Fragment implements
 
             ItemVH(final View itemView) {
                 super(itemView);
-                nameTV = itemView.findViewById(R.id.nameTV);
+                nameTV = itemView.findViewById(R.id.nameLabelTV);
                 quantityUnitPriceTV = itemView.findViewById(R.id.quantityUnitPriceTV);
                 priceTV = itemView.findViewById(R.id.priceTV);
             }

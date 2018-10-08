@@ -4,7 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.google.gson.Gson;
-import com.jeffreyromero.materialestimator.models.MaterialList;
+import com.jeffreyromero.materialestimator.models.ProjectItem;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,20 +13,18 @@ import java.util.Set;
 
 /**
  * Provides a single access point to stored SharedPreferences data.
- *
  * Usage:
- * MaterialListsDataSource mds = new MaterialListsDataSource(
- *          R.string.material_list_shared_preferences,
+ * ProjectItemsSharedPreferences sp = new ProjectItemsSharedPreferences(
+ *          R.string.default_project_items,
  *          context
  * );
- * MaterialList ml = mds.get("R.string.default_drywall_ceiling_material_list");
- *
+ * ProjectItem pi = sp.get("R.string.drywall_ceiling");
  */
-public class MaterialListsDataSource implements DataSource<MaterialList> {
+public class ProjectItemsSharedPreferences implements DataSource<ProjectItem> {
 
     private SharedPreferences spInstance;
 
-    public MaterialListsDataSource(String sharedPreferencesFileName, Context context) {
+    public ProjectItemsSharedPreferences(String sharedPreferencesFileName, Context context) {
         this.spInstance = context.getSharedPreferences(
                 sharedPreferencesFileName,
                 0
@@ -44,41 +42,41 @@ public class MaterialListsDataSource implements DataSource<MaterialList> {
     }
 
     /**
-     * Store a MaterialList using it's name property as key.
+     * Store a ProjectItem using it's material list name property as key.
      * If the list exists it would overwrite it.
      */
     @Override
-    public void put(MaterialList materialList) {
+    public void put(ProjectItem projectItem) {
         SharedPreferences.Editor editor = spInstance.edit();
-        String json = new Gson().toJson(materialList);
-        editor.putString(materialList.getName(), json);
+        String json = new Gson().toJson(projectItem);
+        editor.putString(projectItem.getMaterialList().getName(), json);
         editor.commit();
     }
 
     /**
-     * Get the MaterialList by key.
+     * Get the ProjectItem by key.
      */
     @Override
-    public MaterialList get(String key) {
+    public ProjectItem get(String key) {
         String json = spInstance.getString(key, null);
-        return Deserializer.toMaterialList(json);
+        return Deserializer.toProjectItem(json);
     }
 
     /**
-     * Get the MaterialList by position.
+     * Get the ProjectItem by position.
      */
     @Override
-    public MaterialList get(int position) {
-        ArrayList<MaterialList> allMaterialLists = getAll();
-        return allMaterialLists.get(position);
+    public ProjectItem get(int position) {
+        ArrayList<ProjectItem> allProjectItems = getAll();
+        return allProjectItems.get(position);
     }
 
     /**
-     * Get all the stored MaterialList as a Map.
+     * Get all the stored ProjectItem as a Map.
      */
     @Override
-    public Map<String, MaterialList> getAllAsMap() {
-        Map<String, MaterialList> newMap = new HashMap<>();
+    public Map<String, ProjectItem> getAllAsMap() {
+        Map<String, ProjectItem> newMap = new HashMap<>();
         Map<String, ?> map = spInstance.getAll();
         Set<String> keys = map.keySet();
         for (String key: keys){
@@ -88,16 +86,16 @@ public class MaterialListsDataSource implements DataSource<MaterialList> {
     }
 
     /**
-     * Get all the stored MaterialList as an ArrayList.
+     * Get all the stored ProjectItem as an ArrayList.
      */
     @Override
-    public ArrayList<MaterialList> getAll() {
+    public ArrayList<ProjectItem> getAll() {
         return new ArrayList<>(getAllAsMap().values());
     }
 
     /**
-     * Get the keys of all the stored MaterialList.
-     * This is also all the names of MaterialLists.
+     * Get the keys of all the stored ProjectItem.
+     * This is also all the names of ProjectItems.
      */
     @Override
     public ArrayList<String> getAllKeys() {
@@ -106,7 +104,7 @@ public class MaterialListsDataSource implements DataSource<MaterialList> {
 
 
     /**
-     * Remove a MaterialList by key.
+     * Remove a ProjectItem by key.
      */
     @Override
     public void remove(String key) {
@@ -115,14 +113,14 @@ public class MaterialListsDataSource implements DataSource<MaterialList> {
     }
 
     /**
-     * Rename a stored MaterialList.
+     * Rename a stored ProjectItem.
      */
     @Override
     public void renameKey(String oldName, String newName) {
-        MaterialList materialList = get(oldName);
+        ProjectItem projectItem = get(oldName);
         spInstance.edit().remove(oldName).commit();
-        materialList.setName(newName);
-        put(materialList);
+        projectItem.setName(newName);
+        put(projectItem);
     }
 
     @Override

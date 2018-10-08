@@ -15,21 +15,21 @@ import android.widget.TextView;
 import com.google.gson.Gson;
 import com.jeffreyromero.materialestimator.R;
 import com.jeffreyromero.materialestimator.data.Deserializer;
-import com.jeffreyromero.materialestimator.models.Material;
+import com.jeffreyromero.materialestimator.models.BaseMaterial;
 
 
 /**
- * Displays the dialog for editing a Material.
+ * Displays the dialog for editing a BaseMaterial.
  */
 public class EditMaterialDialog extends DialogFragment {
 
     private OnItemChangeListener onItemChangeListener;
-    private Material selectedMaterial;
+    private BaseMaterial selectedMaterial;
     private View dialogView;
     private Context context;
 
     public interface OnItemChangeListener {
-        void onEditMaterialDialogSubmit(Material material);
+        void onEditMaterialDialogSubmit(BaseMaterial material);
     }
 
     /**
@@ -38,7 +38,7 @@ public class EditMaterialDialog extends DialogFragment {
      * @param inputMaterial the clicked material.
      * @return the edited material.
      */
-    public static EditMaterialDialog newInstance(Material inputMaterial) {
+    public static EditMaterialDialog newInstance(BaseMaterial inputMaterial) {
         EditMaterialDialog fragment = new EditMaterialDialog();
         //Add input data to the bundle.
         Bundle args = new Bundle();
@@ -85,7 +85,7 @@ public class EditMaterialDialog extends DialogFragment {
 
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
         dialogBuilder.setView(dialogView);
-        dialogBuilder.setTitle("Edit Material");
+        dialogBuilder.setTitle("Edit BaseMaterial");
         dialogBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -110,9 +110,9 @@ public class EditMaterialDialog extends DialogFragment {
         return dialogBuilder.create();
     }
 
-    private void setDataToViews(View view, Material selectedMaterial) {
+    private void setDataToViews(View view, BaseMaterial selectedMaterial) {
         //Get views.
-        TextView nameTV = view.findViewById(R.id.nameTV);
+        TextView nameTV = view.findViewById(R.id.nameLabelTV);
         EditText priceET = view.findViewById(R.id.priceET);
         priceET.clearFocus();
         TextView lengthTV = view.findViewById(R.id.lengthTV);

@@ -6,10 +6,9 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-    </style>
-
-    <style name="ToolBarTheme" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
-        <item name="android:background">@color/colorPrimary</item>
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
+        <!--Make the contextual action bar overlay the toolbar instead of push it down-->
+        <item name="windowActionModeOverlay">true</item>
     </style>
 
 </resources>

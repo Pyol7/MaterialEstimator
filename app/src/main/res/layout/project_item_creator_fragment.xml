@@ -63,14 +63,17 @@
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:layout_marginBottom="8dp"
         android:layout_marginTop="12dp"
         android:elevation="0dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        app:layout_constraintBottom_toTopOf="@+id/calc_input_groupLL"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/projectItemListNameTV" />
+        app:layout_constraintTop_toBottomOf="@+id/projectItemListNameTV"
+        app:layout_constraintVertical_bias="0.0" />
 
 
     <!--Input Group Start-->
@@ -114,7 +117,6 @@
             android:layout_marginLeft="16dp"
             android:layout_marginRight="16dp"
             android:text="@string/calcBTN_text"
-            android:textAppearance="@style/TextAppearance.AppCompat.Widget.Button.Colored"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

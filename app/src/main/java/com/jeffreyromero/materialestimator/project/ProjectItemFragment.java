@@ -14,7 +14,7 @@ import android.widget.TextView;
 import com.google.gson.Gson;
 import com.jeffreyromero.materialestimator.R;
 import com.jeffreyromero.materialestimator.data.Deserializer;
-import com.jeffreyromero.materialestimator.models.Material;
+import com.jeffreyromero.materialestimator.models.BaseMaterial;
 import com.jeffreyromero.materialestimator.models.ProjectItem;
 
 /**
@@ -58,7 +58,7 @@ public class ProjectItemFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_project_item, container, false);
 
         //Get views and set values.
-        TextView nameTV = view.findViewById(R.id.nameTV);
+        TextView nameTV = view.findViewById(R.id.nameLabelTV);
         TextView lengthTV = view.findViewById(R.id.lengthTV);
         TextView widthTV = view.findViewById(R.id.widthTV);
         nameTV.setText(projectItem.getName());
@@ -93,7 +93,7 @@ public class ProjectItemFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-            Material material = projectItem.getMaterialList().get(position);
+            BaseMaterial material = projectItem.getMaterialList().get(position);
             ItemViewHolder viewHolder = (ItemViewHolder) holder;
             viewHolder.columnLeftTV.setText(material.getName());
             viewHolder.columnRightTV.setText(String.valueOf(material.getQuantity()));

@@ -4,7 +4,7 @@
     android:id="@+id/list_item"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?android:selectableItemBackground"
+    android:background="@drawable/white_to_light_blue"
     android:padding="8dp">
 
     <TextView

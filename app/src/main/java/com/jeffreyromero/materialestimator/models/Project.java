@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class Project {
     private ArrayList<ProjectItem> projectItems;
-    private ArrayList<Material> materialListFromProjectItems;
+    private ArrayList<BaseMaterial> materialListFromProjectItems;
     private double totalPrice;
     private String dateCreated;
     private String location;
@@ -39,6 +39,11 @@ public class Project {
 
     public void addProjectItem(ProjectItem projectItem){
         projectItems.add(projectItem);
+        builtMaterialListFromProjectItems();
+    }
+
+    public void deleteProjectItem(int position){
+        projectItems.remove(position);
         builtMaterialListFromProjectItems();
     }
 
@@ -92,14 +97,14 @@ public class Project {
         this.client = client;
     }
 
-    public ArrayList<Material> getMaterialList() {
+    public ArrayList<BaseMaterial> getMaterialList() {
         return materialListFromProjectItems;
     }
 
     private void builtMaterialListFromProjectItems() {
 
         //Create a flat list containing all materials from each ProjectItem.
-        ArrayList<Material> flatList = new ArrayList<>();
+        ArrayList<BaseMaterial> flatList = new ArrayList<>();
         for (ProjectItem pi : this.getProjectItems()) {
             MaterialList mList = pi.getMaterialList();
             for (int i = 0; i < mList.size(); i++) {
@@ -108,12 +113,12 @@ public class Project {
         }
 
         //Create a map while summing the quantities of materials with the same name.
-        Map<String, Material> map = new LinkedHashMap<>();
+        Map<String, BaseMaterial> map = new LinkedHashMap<>();
         for (int i = 0; i < flatList.size(); i++) {
             String currentKey = flatList.get(i).getName();
             if (map.containsKey(currentKey)) {
-                Material stored = map.get(currentKey);
-                Material current = flatList.get(i);
+                BaseMaterial stored = map.get(currentKey);
+                BaseMaterial current = flatList.get(i);
                 double sum = stored.getQuantity() + current.getQuantity();
                 stored.setQuantity(sum);
                 map.put(currentKey, stored);
