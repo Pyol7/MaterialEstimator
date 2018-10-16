@@ -22,54 +22,12 @@
             android:id="@+id/nameET"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Project name"
+            android:hint="@string/projects_new_project_name_hint"
             android:inputType="textPersonName"
             android:selectAllOnFocus="true"
             android:singleLine="true"
             android:textSize="16sp" />
 
-    </android.support.design.widget.TextInputLayout>
-
-    <android.support.design.widget.TextInputLayout
-        android:id="@+id/clientTIL"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="24dp"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/nameTIL">
-
-        <android.support.design.widget.TextInputEditText
-            android:id="@+id/clientET"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Client name"
-            android:inputType="textPersonName"
-            android:selectAllOnFocus="false"
-            android:textSize="16sp" />
-    </android.support.design.widget.TextInputLayout>
-
-    <android.support.design.widget.TextInputLayout
-        android:id="@+id/locationTIL"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="24dp"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/clientTIL">
-
-        <android.support.design.widget.TextInputEditText
-            android:id="@+id/locationET"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Location"
-            android:inputType="textPersonName"
-            android:textSize="16sp" />
     </android.support.design.widget.TextInputLayout>
 
 </android.support.constraint.ConstraintLayout>

@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
+import com.jeffreyromero.materialestimator.MainActivity;
 import com.jeffreyromero.materialestimator.R;
 import com.jeffreyromero.materialestimator.data.Deserializer;
 import com.jeffreyromero.materialestimator.models.BaseMaterial;
@@ -57,10 +58,16 @@ public class ProjectItemFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_project_item, container, false);
 
+        // Enable up navigation for this fragment
+        ((MainActivity)getActivity()).enableUpNavigation();
+
+        //Set a title to the toolbar.
+        getActivity().setTitle(projectItem.getName());
+
         //Get views and set values.
         TextView nameTV = view.findViewById(R.id.nameLabelTV);
-        TextView lengthTV = view.findViewById(R.id.lengthTV);
-        TextView widthTV = view.findViewById(R.id.widthTV);
+        TextView lengthTV = view.findViewById(R.id.lengthET);
+        TextView widthTV = view.findViewById(R.id.widthET);
         nameTV.setText(projectItem.getName());
         lengthTV.setText(String.valueOf(projectItem.getLength()));
         widthTV.setText(String.valueOf(projectItem.getWidth()));

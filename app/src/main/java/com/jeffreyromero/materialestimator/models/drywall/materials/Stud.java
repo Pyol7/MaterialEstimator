@@ -10,7 +10,6 @@ public class Stud extends Material {
         super("Stud", name, price, length, spacing);
     }
 
-    //todo - get exact quantities(if statements etc)
     @Override
     public double calcQuantity(double length, double height) {
         double pieces = length/ getSpacing();

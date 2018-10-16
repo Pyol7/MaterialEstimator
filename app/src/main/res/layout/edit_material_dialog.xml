@@ -8,7 +8,7 @@
     android:focusableInTouchMode="true">
 
     <TextView
-        android:id="@+id/lengthTV"
+        android:id="@+id/lengthET"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
@@ -19,7 +19,7 @@
         app:layout_constraintTop_toBottomOf="@+id/priceET" />
 
     <TextView
-        android:id="@+id/widthTV"
+        android:id="@+id/widthET"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
@@ -27,10 +27,10 @@
         android:text="width"
         android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/lengthTV"
+        app:layout_constraintEnd_toEndOf="@+id/lengthET"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="@+id/guideline"
-        app:layout_constraintTop_toBottomOf="@+id/lengthTV"
+        app:layout_constraintTop_toBottomOf="@+id/lengthET"
         app:layout_constraintVertical_bias="0.0" />
 
     <TextView
@@ -65,7 +65,7 @@
         android:layout_marginEnd="8dp"
         android:text="Length:"
         android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="@+id/lengthTV"
+        app:layout_constraintBottom_toBottomOf="@+id/lengthET"
         app:layout_constraintEnd_toStartOf="@+id/guideline"
         app:layout_constraintStart_toStartOf="@+id/priceETLabel" />
 
@@ -76,7 +76,7 @@
         android:layout_marginEnd="8dp"
         android:text="Width:"
         android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="@+id/widthTV"
+        app:layout_constraintBottom_toBottomOf="@+id/widthET"
         app:layout_constraintEnd_toStartOf="@+id/guideline"
         app:layout_constraintStart_toStartOf="@+id/lengthTVLabel" />
 

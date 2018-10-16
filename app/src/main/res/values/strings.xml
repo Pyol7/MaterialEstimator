@@ -67,35 +67,38 @@
     <string name="average_wire_length_title">Average wire length</string>
     <string name="average_wire_length_summary">The average distance from ceiling to support</string>
 
-    <!--Nav Drawer items-->
+    <!--Nav Drawer-->
+    <string name="nav_open">Navigation drawer is opened</string>
+    <string name="nav_close">Navigation drawer is closed</string>
     <string name="nav_projects">Projects</string>
     <string name="nav_material_lists">Manage Material Lists</string>
     <string name="nav_trash">Trash</string>
     <string name="nav_settings">Settings</string>
 
     <!--ProjectsFragment-->
+    <string name="projects_new_project_name_hint">Project name</string>
     <string name="projects_empty_view_title">Add a project</string>
     <string name="projects_empty_view_message">Click the + button to create your first project</string>
 
     <!--ProjectFragment-->
     <string name="project_date_created_text">Date Created:</string>
     <string name="project_description_text">Description</string>
-    <string name="project_empty_view_title">Add project items</string>
+    <string name="project_empty_view_title">Add items</string>
     <string name="project_empty_view_message1">
-        Click the + button to add project items.
+        Click the + button to add items.
     </string>
     <string name="project_empty_view_message2">
         Project items are the things that make up your project,
         eg. Living Room Ceiling, Drywall Partition etc.
     </string>
 
-    <!--AddProjectDialog-->
+    <!--dialog-->
     <string name="add_project_dialog_title">Create New Project</string>
 
     <!--ProjectItemCreatorFragment-->
-    <string name="projectItemCreatorFragment_title">Project item creator</string>
-    <string name="projectItemNameTV_text">Project Item Name</string>
-    <string name="projectItemListNameTV_text">Select material list</string>
+    <string name="projectItemCreatorFragment_title">Create new item</string>
+    <string name="projectItemNameTVLabel">Name:</string>
+    <string name="projectItemListNameTVLabel">Type:</string>
     <string name="calcBTN_text">Calculate</string>
     <string name="add_name_dialog_title">Add a name</string>
     <string name="select_project_item_type_dialog_title">Select an type</string>

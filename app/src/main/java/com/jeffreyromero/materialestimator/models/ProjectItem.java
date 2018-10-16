@@ -2,18 +2,24 @@ package com.jeffreyromero.materialestimator.models;
 
 import org.apache.commons.lang3.StringUtils;
 
-public class ProjectItem{
+public abstract class ProjectItem {
     private String type;
     private MaterialList materialList;
     private double totalPrice;
     protected double length;
     protected double width;
+    protected double height;
     protected String name;
 
     protected ProjectItem(String type, String name) {
         this.type = type;
         this.name = name;
     }
+
+    public abstract MaterialList initMaterialList();
+    public abstract void calcQuantities(double x, double y);
+    public abstract String getXHintText();
+    public abstract String getYHintText();
 
     public MaterialList getMaterialList() {
         return materialList;
@@ -45,6 +51,14 @@ public class ProjectItem{
 
     public void setWidth(double width) {
         this.width = width;
+    }
+
+    public double getHeight() {
+        return height;
+    }
+
+    public void setHeight(double height) {
+        this.height = height;
     }
 
     public double getTotalPrice() {

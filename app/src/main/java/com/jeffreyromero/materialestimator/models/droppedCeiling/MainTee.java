@@ -11,9 +11,7 @@ public class MainTee extends Material {
     }
 
     @Override
-    public double calcQuantity(double dim1, double dim2) {
-        double length = Math.max(dim1, dim2);
-        double width = Math.min(dim1, dim2);
+    public double calcQuantity(double length, double width) {
         double q = (length / getSpacing()) * (width / getLength());
         return super.setQuantity(q);
     }

@@ -53,7 +53,7 @@ public class ProjectsDataSource implements DataSource<Project> {
     }
 
     /**
-     * Get the MaterialList by position.
+     * Get the Project by position.
      */
     @Override
     public Project get(int position) {
@@ -70,7 +70,7 @@ public class ProjectsDataSource implements DataSource<Project> {
     }
 
     /**
-     * Get all the stored MaterialList as a Map.
+     * Get all the stored Project as a Map.
      */
     @Override
     public Map<String, Project> getAllAsMap() {

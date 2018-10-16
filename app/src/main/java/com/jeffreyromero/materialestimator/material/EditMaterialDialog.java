@@ -115,8 +115,8 @@ public class EditMaterialDialog extends DialogFragment {
         TextView nameTV = view.findViewById(R.id.nameLabelTV);
         EditText priceET = view.findViewById(R.id.priceET);
         priceET.clearFocus();
-        TextView lengthTV = view.findViewById(R.id.lengthTV);
-        TextView widthTV = view.findViewById(R.id.widthTV);
+        TextView lengthTV = view.findViewById(R.id.lengthET);
+        TextView widthTV = view.findViewById(R.id.widthET);
 
         //Set values.
         nameTV.setText(selectedMaterial.getName());

@@ -4,7 +4,6 @@ import com.jeffreyromero.materialestimator.models.BaseMaterial;
 import com.jeffreyromero.materialestimator.models.Material;
 import com.jeffreyromero.materialestimator.models.MaterialList;
 import com.jeffreyromero.materialestimator.models.ProjectItem;
-import com.jeffreyromero.materialestimator.models.QuantifiableProjectItem;
 import com.jeffreyromero.materialestimator.models.drywall.fasteners.FramingFastener;
 import com.jeffreyromero.materialestimator.models.drywall.fasteners.MainChannelFastener;
 import com.jeffreyromero.materialestimator.models.drywall.materials.FurringChannel;
@@ -21,12 +20,16 @@ import java.util.List;
 
 public class DrywallCeiling extends ProjectItem {
 
+    private static final String LENGTH = "Length";
+    private static final String WIDTH = "Width";
+
     public DrywallCeiling(String name) {
         super("Drywall Ceiling", name);
         setMaterialList(initMaterialList());
     }
 
-    private MaterialList initMaterialList() {
+    @Override
+    public MaterialList initMaterialList() {
         List<BaseMaterial> list = new ArrayList<>();
         list.add(new WallAngle("Metal Wall Angles", 15.25, 120));
         list.add(new WallAngleFastener("Nails 3/4", 0.16,12));
@@ -41,9 +44,14 @@ public class DrywallCeiling extends ProjectItem {
         return new MaterialList(list, generateNameFromClassName());
     }
 
-    public void calcQuantities(double length, double width){
+    @Override
+    public void calcQuantities(double x, double y){
+        // Analyse dimensions
+        double length = Math.max(x, y);
+        double width = Math.min(x, y);
         setLength(length);
         setWidth(width);
+        // Calculate quantities
         List<BaseMaterial> tempList = new ArrayList<>();
         MaterialList ml = getMaterialList();
         for (BaseMaterial bm : ml.getList()){
@@ -85,5 +93,13 @@ public class DrywallCeiling extends ProjectItem {
         }
         // Update materialList
         ml.setList(tempList);
+    }
+
+    public String getXHintText(){
+        return LENGTH;
+    }
+
+    public String getYHintText(){
+        return WIDTH;
     }
 }

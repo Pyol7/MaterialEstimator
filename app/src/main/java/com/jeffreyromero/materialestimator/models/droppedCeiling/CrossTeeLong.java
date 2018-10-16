@@ -6,25 +6,20 @@ import static java.lang.Math.sqrt;
 
 public class CrossTeeLong extends Material {
 
-    public CrossTeeLong(String name, double unitPrice) {
-        super("Cross Tee Long", name, unitPrice, 48);
+    public CrossTeeLong(String name, double unitPrice, double length, int spacing) {
+        super("Cross Tee Long", name, unitPrice, length, spacing);
     }
 
     @Override
-    public double calcQuantity(double dim1, double dim2) {
-        double length = Math.max(dim1, dim2);
-        double width = Math.min(dim1, dim2);
-        double q = (length / getLength()) *
-                (width / 24);
-        super.setQuantity(q);
-        return q;
+    public double calcQuantity(double length, double width) {
+        double q = (length / getLength()) * (width / 24);
+        return  super.setQuantity(q);
     }
 
     @Override
     public double calcQuantity(double area) {
         double length = sqrt(area);
         double q = this.calcQuantity(length, length);
-        super.setQuantity(q);
-        return q;
+        return super.setQuantity(q);
     }
 }

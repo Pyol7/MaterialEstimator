@@ -5,7 +5,11 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -20,20 +24,18 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
+import com.jeffreyromero.materialestimator.MainActivity;
 import com.jeffreyromero.materialestimator.R;
 import com.jeffreyromero.materialestimator.data.Deserializer;
 import com.jeffreyromero.materialestimator.data.ProjectItemsSharedPreferences;
 import com.jeffreyromero.materialestimator.material.SingleSelectDialog;
 import com.jeffreyromero.materialestimator.models.BaseMaterial;
-import com.jeffreyromero.materialestimator.models.MaterialList;
-import com.jeffreyromero.materialestimator.models.Project;
 import com.jeffreyromero.materialestimator.models.ProjectItem;
 import com.jeffreyromero.materialestimator.models.defaultProjectItems.DroppedCeiling;
 import com.jeffreyromero.materialestimator.models.defaultProjectItems.DrywallCeiling;
 import com.jeffreyromero.materialestimator.models.defaultProjectItems.DrywallPartition;
 import com.jeffreyromero.materialestimator.utilities.SingleInputDialog;
 
-import java.util.ArrayList;
 import java.util.Locale;
 
 /**
@@ -114,14 +116,14 @@ public class ProjectItemCreatorFragment extends Fragment implements
             projectItem = Deserializer.toProjectItem(savedInstanceState.getString(PROJECT_ITEM));
         }
 
-        //Instantiate the adapter.
+        // Instantiate the adapter.
         adapter = new ProjectItemAdapter();
     }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        //Show options menu.
+        // Show options menu.
         setHasOptionsMenu(true);
 
         // Inflate the layout for this fragment
@@ -131,26 +133,26 @@ public class ProjectItemCreatorFragment extends Fragment implements
                 false
         );
 
-        //Set a title to the toolbar.
+        // Enable up navigation for this fragment
+        ((MainActivity)getActivity()).enableUpNavigation();
+
+        // Set a title to the toolbar.
 //        ActionBar actionBar = ((AppCompatActivity)getActivity()).getSupportActionBar();
-//        actionBar.setTitle(project.getName());
-//        actionBar.setSubtitle(getString(R.string.projectItemCreatorFragment_title));
+//        actionBar.setTitle(getString(R.string.projectItemCreatorFragment_title));
 
         if (getArguments() != null) {
-            getActivity().setTitle(getArguments().getString(PROJECT_NAME));
+            getActivity().setTitle(getString(R.string.projectItemCreatorFragment_title));
         }
 
-        //Show help message if there is no project items in project.
-//        if (project.getProjectItems().size() == 0) {
-//            showAddProjectItemMessageDialog();
-//        }
+        // Set EditText hints
+        setHints();
 
-        //Set project item name and click listener.
+        // Set project item name and click listener.
         TextView projectItemNameTV = view.findViewById(R.id.projectItemNameTV);
         projectItemNameTV.setText(projectItem.getName());
         projectItemNameTV.setOnClickListener(new showAddNameDialog());
 
-        //Set the current list name and click listener.
+        // Set the current list name and click listener.
         TextView projectItemListNameTV = view.findViewById(R.id.projectItemListNameTV);
         projectItemListNameTV.setText(projectItem.getMaterialList().getName());
         projectItemListNameTV.setOnClickListener(new View.OnClickListener() {
@@ -160,21 +162,21 @@ public class ProjectItemCreatorFragment extends Fragment implements
             }
         });
 
-        //Display the current project item list.
+        // Display the current project item list.
         recyclerView = view.findViewById(R.id.recyclerView);
         recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
 
-        //Calculate quantities based on user input.
+        // Calculate quantities based on user input.
         Button btn = view.findViewById(R.id.calcBTN);
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //Get user inputs views.
-                lengthET = view.findViewById(R.id.lengthTV);
-                widthET = view.findViewById(R.id.widthTV);
-                //Check the length of the input text to determine if its empty.
+                // Get input views
+                lengthET = view.findViewById(R.id.lengthET);
+                widthET = view.findViewById(R.id.widthET);
+                // Check the length of the input text to determine if its empty.
                 int lengthSize = lengthET.getText().toString().trim().length();
                 int widthSize = widthET.getText().toString().trim().length();
                 if (lengthSize != 0 && widthSize != 0) {
@@ -197,23 +199,32 @@ public class ProjectItemCreatorFragment extends Fragment implements
         outState.putString(PROJECT_ITEM, new Gson().toJson(projectItem));
     }
 
+    private void setHints(){
+        TextInputLayout lengthTIL = view.findViewById(R.id.lengthTIL);
+        lengthTIL.setHint(projectItem.getXHintText());
+        TextInputLayout widthTIL = view .findViewById(R.id.widthTIL);
+        widthTIL.setHint(projectItem.getYHintText());
+    }
+
     private void calculateQuantities() {
         //Get inputs.
-        double length =
-                Double.valueOf(lengthET.getText().toString()) * FEET_TO_INCHES;
-        double width =
-                Double.valueOf(widthET.getText().toString()) * FEET_TO_INCHES;
+        double x = Double.valueOf(lengthET.getText().toString()) * FEET_TO_INCHES;
+        double y = Double.valueOf(widthET.getText().toString()) * FEET_TO_INCHES;
 
         //Calculate quantities.
-        if (projectItem.getMaterialList().getName().equals("Dropped Ceiling")) {
-            DroppedCeiling droppedCeiling = (DroppedCeiling) projectItem;
-            droppedCeiling.calcQuantities(length, width);
-        } else if (projectItem.getMaterialList().getName().equals("Drywall Ceiling")) {
-            DrywallCeiling drywallCeiling = (DrywallCeiling) projectItem;
-            drywallCeiling.calcQuantities(length, width);
-        } else if (projectItem.getMaterialList().getName().equals("Drywall Partition")) {
-            DrywallPartition drywallPartition = (DrywallPartition) projectItem;
-            drywallPartition.calcQuantities(length, width);
+        switch (projectItem.getMaterialList().getName()) {
+            case "Dropped Ceiling":
+                DroppedCeiling droppedCeiling = (DroppedCeiling) projectItem;
+                droppedCeiling.calcQuantities(x, y);
+                break;
+            case "Drywall Ceiling":
+                DrywallCeiling drywallCeiling = (DrywallCeiling) projectItem;
+                drywallCeiling.calcQuantities(x, y);
+                break;
+            case "Drywall Partition":
+                DrywallPartition drywallPartition = (DrywallPartition) projectItem;
+                drywallPartition.calcQuantities(x, y);
+                break;
         }
 
         //Update adapter
@@ -277,6 +288,7 @@ public class ProjectItemCreatorFragment extends Fragment implements
         // Keep user provided name
         selectedProjectItem.setName(projectItem.getName());
         projectItem = selectedProjectItem;
+        setHints();
         adapter.notifyDataSetChanged();
     }
 

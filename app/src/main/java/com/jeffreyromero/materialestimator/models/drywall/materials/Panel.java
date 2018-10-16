@@ -6,8 +6,8 @@ import static java.lang.Math.sqrt;
 
 public class Panel extends Material {
 
-    public Panel(String name, double price, double length, double width, int spacing) {
-        super("Panel", name, price, length, width, spacing);
+    public Panel(String name, double price, double length, double width, int screwSpacing) {
+        super("Panel", name, price, length, width, screwSpacing);
     }
 
     @Override

@@ -1,10 +1,12 @@
 package com.jeffreyromero.materialestimator.project;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.drawable.TransitionDrawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
@@ -13,8 +15,11 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.EditText;
 import android.widget.TextView;
 
+import com.jeffreyromero.materialestimator.MainActivity;
 import com.jeffreyromero.materialestimator.utilities.CustomRecyclerView;
 import com.jeffreyromero.materialestimator.R;
 import com.jeffreyromero.materialestimator.data.ProjectsDataSource;
@@ -24,14 +29,15 @@ import com.jeffreyromero.materialestimator.utilities.PrimaryActionModeCallBack;
 import java.util.ArrayList;
 
 /**
- * Displays all the projects from shared preferences.
- * Returns the clicked ic_project to the listener.
+ * Displays all the stored projects.
+ * Returns the clicked project to MainActivity.
  */
-public class ProjectsFragment extends Fragment implements
-        AddProjectDialog.OnCreateListener {
+public class ProjectsFragment extends Fragment {
 
+    private static final String PROJECTS = "projects";
+    private ProjectsDataSource projectsdataSource;
     private OnItemClickListener mListener;
-    private ProjectsDataSource dataSource;
+    private ArrayList<Project> projects;
     private ProjectsAdapter adapter;
     private Context context;
 
@@ -62,10 +68,12 @@ public class ProjectsFragment extends Fragment implements
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //Get the data source.
-        dataSource = new ProjectsDataSource(context);
-        // Setup the adaptor with the list of projects
-        adapter = new ProjectsAdapter(dataSource.getAll());
+        // Init ProjectsDataSource
+        projectsdataSource = new ProjectsDataSource(context);
+        // Get array list of projects from SP
+        projects = projectsdataSource.getAll();
+        // Init list adapter
+        adapter = new ProjectsAdapter();
     }
 
     @Override
@@ -79,11 +87,19 @@ public class ProjectsFragment extends Fragment implements
         getActivity().setTitle(R.string.nav_projects);
         //Get the recyclerView from the parent fragment view.
         CustomRecyclerView rv = view.findViewById(R.id.customRecyclerView);
-        rv.setHasFixedSize(true);
-        rv.setEmptyView(view.findViewById(R.id.empty_view));
+        rv.setEmptyView(view.findViewById(R.id.emptyView));
         rv.setAdapter(adapter);
 
+        // Enable drawer navigation for this fragment
+        ((MainActivity)getActivity()).enableDrawerNavigation();
+
         return view;
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mListener = null;
     }
 
     @Override
@@ -98,66 +114,61 @@ public class ProjectsFragment extends Fragment implements
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_add) {
-            //Load AddProjectDialog.
-            AddProjectDialog f = AddProjectDialog.newInstance();
-            f.setTargetFragment(ProjectsFragment.this, 0);
-            f.show(getActivity().getSupportFragmentManager(), f.getClass().getSimpleName());
+            addProject();
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        adapter.setProjects(dataSource.getAll());
-        adapter.notifyDataSetChanged();
-    }
+    public void addProject() {
+        // Inflate the view
+        final View dialogView = getActivity().getLayoutInflater()
+                .inflate(R.layout.add_project_dialog, null);
 
-    @Override
-    public void onAddProjectDialogSubmit(String name, String client, String location) {
-        Project project = new Project(name);
-        project.setClient(client);
-        project.setLocation(location);
-        //Update local list.
-        adapter.addProject(project);
-        adapter.notifyDataSetChanged();
-        //Update stored list.
-        dataSource.put(project);
-        //Pass the new project to the listener.
-        mListener.onProjectsFragmentItemClick(project);
-    }
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
+        dialogBuilder.setView(dialogView);
+        dialogBuilder.setTitle(getActivity().getString(R.string.add_project_dialog_title));
+        dialogBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
 
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
+                // Get user input
+                EditText nameET = dialogView.findViewById(R.id.nameET);
+                String name = nameET.getText().toString();
+                // Create new project
+                Project project = new Project(name);
+                // Add new project to SP
+                projectsdataSource.put(project);
+                // Get updated list of projects
+                projects = projectsdataSource.getAll();
+                adapter.notifyDataSetChanged();
+                //Pass the new project to MainActivity
+                mListener.onProjectsFragmentItemClick(project);
+
+            }
+        });
+        dialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                //
+            }
+        });
+        AlertDialog alertDialog = dialogBuilder.create();
+        //Show keyboard.
+        alertDialog.getWindow().setSoftInputMode(
+                WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+        // Show dialog
+        alertDialog.show();
     }
 
     //------------------------------- Adapter -------------------------------//
 
-    public class ProjectsAdapter extends RecyclerView.Adapter {
+    public class ProjectsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-        private ArrayList<Project> projects;
         private ActionMode mActionMode;
-
-        ProjectsAdapter(ArrayList<Project> projects) {
-            this.projects = projects;
-        }
-
-        void setProjects(ArrayList<Project> projects) {
-            this.projects = projects;
-            notifyDataSetChanged();
-        }
-
-        void addProject(Project project){
-            projects.add(project);
-            notifyDataSetChanged();
-        }
 
         @Override
         public int getItemCount() {
-
             return projects == null ? 0 : projects.size();
         }
 
@@ -198,14 +209,13 @@ public class ProjectsFragment extends Fragment implements
                     @Override
                     public void onClick(View v) {
 
-                        //Pass the clicked ic_project to the listener.
+                        //Pass the clicked project to MainActivity.
                         mListener.onProjectsFragmentItemClick(projects.get(getAdapterPosition()));
 
                     }
                 });
 
                 itemView.setOnLongClickListener(new View.OnLongClickListener() {
-                    // Called when the user long-clicks
                     public boolean onLongClick(View view) {
                         if (mActionMode != null) {
                             return false;
@@ -224,12 +234,31 @@ public class ProjectsFragment extends Fragment implements
                     }
                 });
             }
-
+            // PrimaryActionModeCallBack interface callback methods
             @Override
-            public void deleteItem(int position) {
-                projects.remove(position);
-                adapter.notifyItemRemoved(position);
-                adapter.notifyItemChanged(getItemCount()-1);
+            public void deleteItem(final int position) {
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
+                alertDialogBuilder
+                        .setTitle("Delete project?")
+                        .setPositiveButton("Delete",new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog,int id) {
+
+                                // Remove the selected project
+                                projectsdataSource.remove(projects.get(position).getName());
+                                projects = projectsdataSource.getAll();
+                                adapter.notifyDataSetChanged();
+
+                            }
+                        })
+                        .setNegativeButton("Cancel",new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog,int id) {
+                                // if this button is clicked, just close
+                                // the dialog box and do nothing
+                                dialog.cancel();
+                            }
+                        });
+                AlertDialog alertDialog = alertDialogBuilder.create();
+                alertDialog.show();
             }
 
             @Override

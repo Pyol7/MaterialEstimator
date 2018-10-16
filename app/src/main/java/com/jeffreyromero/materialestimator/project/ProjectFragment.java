@@ -27,12 +27,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
+import com.jeffreyromero.materialestimator.MainActivity;
 import com.jeffreyromero.materialestimator.R;
 import com.jeffreyromero.materialestimator.data.Deserializer;
 import com.jeffreyromero.materialestimator.data.ProjectsDataSource;
 import com.jeffreyromero.materialestimator.models.BaseMaterial;
 import com.jeffreyromero.materialestimator.models.Project;
 import com.jeffreyromero.materialestimator.models.ProjectItem;
+import com.jeffreyromero.materialestimator.utilities.CustomRecyclerView;
 import com.jeffreyromero.materialestimator.utilities.PrimaryActionModeCallBack;
 
 import java.io.File;
@@ -41,7 +43,7 @@ import java.io.IOException;
 import java.util.Locale;
 
 /**
- * Receives a Project from the activity and displays it.
+ * Receives a Project from MainActivity and displays it.
  */
 public class ProjectFragment extends Fragment implements
         ProjectItemCreatorFragment.OnFragmentInteractionListener {
@@ -92,20 +94,16 @@ public class ProjectFragment extends Fragment implements
         super.onCreate(savedInstanceState);
 
         if (savedInstanceState == null){
-            // Use the provided project
+            // Use the passed in project
             if (getArguments() != null) {
                 String json = getArguments().getString(PROJECT);
                 project = Deserializer.toProject(json);
             }
         } else {
-            // Get the project item currently in use from the savedInstanceState bundle
+            // Get the current project from the savedInstanceState bundle
             project = Deserializer.toProject(savedInstanceState.getString(PROJECT));
         }
 
-        // If project items is empty show ProjectItemCreator.
-//        if (project.getProjectItems().size() == 0) {
-//            showProjectItemCreator();
-//        }
         // Init list adapters
         projectItemAdapter = new ProjectItemAdapter();
         materialListAdapter = new MaterialListAdapter();
@@ -120,6 +118,9 @@ public class ProjectFragment extends Fragment implements
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.project_fragment, container, false);
 
+        // Enable up navigation for this fragment
+        ((MainActivity)getActivity()).enableDrawerNavigation();
+
         //Set a title to the toolbar.
         getActivity().setTitle(project.getName());
 
@@ -132,7 +133,8 @@ public class ProjectFragment extends Fragment implements
         dateCreatedTV.setText(project.getDateCreated());
 
         //Set up the recyclerView.
-        RecyclerView rv = view.findViewById(R.id.recyclerView);
+        CustomRecyclerView rv = view.findViewById(R.id.customRecyclerView);
+        rv.setEmptyView(view.findViewById(R.id.emptyView));
         rv.setAdapter(projectItemAdapter);
 
         return view;
@@ -147,7 +149,7 @@ public class ProjectFragment extends Fragment implements
     @Override
     public void onPause() {
         super.onPause();
-        // Save altered project to SP
+        // Persist the current project
         ProjectsDataSource pds = new ProjectsDataSource(context);
         pds.put(project);
     }
@@ -160,7 +162,7 @@ public class ProjectFragment extends Fragment implements
 
     @Override
     public void onProjectItemCreated(ProjectItem projectItem) {
-        //Add the created ProjectItem to the current Project.
+        // Add the created ProjectItem to the current Project
         project.addProjectItem(projectItem);
         projectItemAdapter.notifyItemInserted(project.getProjectItems().size());
         //TODO - Create stackOverflow background animation.
@@ -295,19 +297,17 @@ public class ProjectFragment extends Fragment implements
     }
 
     private void showMaterialListView(){
-        //Create a new adapter and set it to the existing recyclerView.
-        RecyclerView rv = view.findViewById(R.id.recyclerView);
+        CustomRecyclerView rv = view.findViewById(R.id.customRecyclerView);
         rv.setAdapter(materialListAdapter);
     }
 
     private void showProjectItemView(){
-        //Create a new adapter and set it to the existing recyclerView.
-        RecyclerView rv = view.findViewById(R.id.recyclerView);
+        CustomRecyclerView rv = view.findViewById(R.id.customRecyclerView);
         rv.setAdapter(projectItemAdapter);
     }
 
     private void showProjectItemCreator() {
-        //Show the ProjectItemCreatorFragment.
+        // Show the ProjectItemCreatorFragment
         ProjectItemCreatorFragment f = ProjectItemCreatorFragment.newInstance(project.getName());
         f.setTargetFragment(ProjectFragment.this, 0);
         FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
@@ -327,7 +327,11 @@ public class ProjectFragment extends Fragment implements
 
         @Override
         public int getItemCount() {
-            return project.getProjectItems() == null ? 0 : project.getProjectItems().size() + 1;
+            if (project.getProjectItems() == null | project.getProjectItems().size() == 0) {
+                return 0;
+            } else {
+                return project.getProjectItems().size() + 1;
+            }
         }
 
         //Determine which layout to use for the row.
@@ -451,7 +455,7 @@ public class ProjectFragment extends Fragment implements
             public void deleteItem(int position) {
                 project.deleteProjectItem(position);
                 projectItemAdapter.notifyItemRemoved(position);
-                projectItemAdapter.notifyItemChanged(getItemCount()-1);
+                projectItemAdapter.notifyItemChanged(getItemCount() == 0 ? 0 : getItemCount()-1);
             }
 
             @Override

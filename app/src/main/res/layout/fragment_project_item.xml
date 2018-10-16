@@ -43,7 +43,7 @@
         tools:text="project item" />
 
     <TextView
-        android:id="@+id/lengthTV"
+        android:id="@+id/lengthET"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -60,11 +60,11 @@
         android:text="Width:"
         android:textSize="16sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="@+id/lengthTV"
-        app:layout_constraintStart_toEndOf="@+id/lengthTV" />
+        app:layout_constraintBottom_toBottomOf="@+id/lengthET"
+        app:layout_constraintStart_toEndOf="@+id/lengthET" />
 
     <TextView
-        android:id="@+id/widthTV"
+        android:id="@+id/widthET"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"

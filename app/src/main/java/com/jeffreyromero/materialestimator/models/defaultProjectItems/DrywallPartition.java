@@ -23,12 +23,16 @@ import java.util.List;
 
 public class DrywallPartition extends ProjectItem {
 
+    private static final String LENGTH = "Length";
+    private static final String HEIGHT = "Height";
+
     public DrywallPartition(String name) {
         super("Drywall Partition", name);
         setMaterialList(initMaterialList());
     }
 
-    private MaterialList initMaterialList() {
+    @Override
+    public MaterialList initMaterialList() {
         List<BaseMaterial> list = new ArrayList<>();
         list.add(new Track("Metal Tracks",19.50,120));
         list.add(new TrackFastener("Concrete nails for floor tracks",0.11,16));
@@ -41,9 +45,13 @@ public class DrywallPartition extends ProjectItem {
         return new MaterialList(list, generateNameFromClassName());
     }
 
-    public void calcQuantities(double length, double height){
+    @Override
+    public void calcQuantities(double x, double y){
+        // Analyse dimensions
+        double length = x;
+        double height = y;
         setLength(length);
-        setWidth(height);
+        setHeight(height);
         List<BaseMaterial> tempList = new ArrayList<>();
         MaterialList ml = getMaterialList();
         for (BaseMaterial bm : ml.getList()){
@@ -75,5 +83,15 @@ public class DrywallPartition extends ProjectItem {
         }
         // Update materialList
         ml.setList(tempList);
+    }
+
+    @Override
+    public String getXHintText() {
+        return LENGTH;
+    }
+
+    @Override
+    public String getYHintText() {
+        return HEIGHT;
     }
 }

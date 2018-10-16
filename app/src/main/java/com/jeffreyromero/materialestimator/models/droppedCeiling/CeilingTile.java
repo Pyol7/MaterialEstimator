@@ -9,8 +9,8 @@ public class CeilingTile extends Material {
     }
 
     @Override
-    public double calcQuantity(double dim1, double dim2) {
-        double q = (dim1*dim2)/(getLength()* getWidth());
+    public double calcQuantity(double length, double width) {
+        double q = (length*width)/(getLength()* getWidth());
         return super.setQuantity(q);
     }
 

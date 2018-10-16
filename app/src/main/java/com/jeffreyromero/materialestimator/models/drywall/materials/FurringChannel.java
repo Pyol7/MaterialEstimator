@@ -13,9 +13,7 @@ public class FurringChannel extends Material {
     }
 
     @Override
-    public double calcQuantity(double dim1, double dim2) {
-        double length = Math.max(dim1, dim2);
-        double width = Math.min(dim1, dim2);
+    public double calcQuantity(double length, double width) {
         double lengths;
 
         double pieces = (length / getSpacing()) - 1;

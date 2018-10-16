@@ -1,4 +1,4 @@
-package com.jeffreyromero.materialestimator.project;
+package com.jeffreyromero.materialestimator.utilities;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -18,19 +18,19 @@ import com.jeffreyromero.materialestimator.R;
 
 
 /**
- * Displays a dialog to create a new ic_project and passes
+ * Displays a dialog to create a new project and passes
  * the name and description back to the hosting fragment.
  */
-public class AddProjectDialog extends DialogFragment {
+public class dialog extends DialogFragment {
 
     private OnCreateListener mListener;
 
-    public AddProjectDialog() {
+    public dialog() {
         // Required empty public constructor
     }
 
-    public static AddProjectDialog newInstance() {
-        return new AddProjectDialog();
+    public static dialog newInstance() {
+        return new dialog();
     }
 
     public interface OnCreateListener {
@@ -45,7 +45,7 @@ public class AddProjectDialog extends DialogFragment {
             mListener = (OnCreateListener) getTargetFragment();
         } catch (ClassCastException e) {
             throw new ClassCastException(
-                    "The hosting fragment must implement AddProjectDialog.OnCreateListener"
+                    "The hosting fragment must implement dialog.OnCreateListener"
             );
         }
     }
@@ -66,14 +66,10 @@ public class AddProjectDialog extends DialogFragment {
 
                 //Get user input.
                 EditText nameET = dialogView.findViewById(R.id.nameET);
-                EditText clientET = dialogView.findViewById(R.id.clientET);
-                EditText locationET = dialogView.findViewById(R.id.locationET);
                 String name = nameET.getText().toString();
-                String client = clientET.getText().toString();
-                String location = locationET.getText().toString();
 
                 //Inform the listener of the new ic_project created.
-                mListener.onAddProjectDialogSubmit(name, client, location);
+//                mListener.onAddProjectDialogSubmit(name, client, location);
 
             }
         });

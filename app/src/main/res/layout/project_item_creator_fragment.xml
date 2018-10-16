@@ -10,9 +10,7 @@
         android:id="@+id/projectItemNameTV"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
         android:clickable="true"
         android:focusable="true"
         android:gravity="center"
@@ -20,10 +18,9 @@
         android:textColor="@color/colorPrimary"
         android:textSize="16sp"
         android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="@string/untitled" />
+        app:layout_constraintBottom_toBottomOf="@+id/projectItemNameTVLabel"
+        app:layout_constraintStart_toEndOf="@+id/projectItemNameTVLabel"
+        tools:text="Untitled" />
 
     <ImageView
         android:id="@+id/projectItemNameIcon"
@@ -40,14 +37,14 @@
         android:id="@+id/projectItemListNameTV"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:focusable="auto"
         android:gravity="center"
+        android:textColor="@color/colorPrimary"
         android:textSize="16sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@+id/projectItemListNameTVLabel"
+        app:layout_constraintStart_toStartOf="@+id/projectItemNameTV"
         app:layout_constraintTop_toBottomOf="@+id/projectItemNameTV"
         tools:text="Material List" />
 
@@ -64,7 +61,6 @@
         android:id="@+id/recyclerView"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginBottom="8dp"
         android:layout_marginTop="12dp"
         android:elevation="0dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
@@ -99,14 +95,14 @@
             android:layout_height="wrap_content">
 
             <android.support.design.widget.TextInputEditText
-                android:id="@+id/lengthTV"
+                android:id="@+id/lengthET"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:hint="@string/length"
                 android:inputType="numberDecimal"
                 android:selectAllOnFocus="true"
-                android:singleLine="true" />
+                android:singleLine="true"
+                tools:text="@string/length" />
         </android.support.design.widget.TextInputLayout>
 
         <Button
@@ -116,7 +112,9 @@
             android:layout_gravity="bottom"
             android:layout_marginLeft="16dp"
             android:layout_marginRight="16dp"
+            android:background="@color/colorPrimary"
             android:text="@string/calcBTN_text"
+            android:textColor="@color/white"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -128,17 +126,40 @@
             android:layout_height="wrap_content">
 
             <android.support.design.widget.TextInputEditText
-                android:id="@+id/widthTV"
+                android:id="@+id/widthET"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:hint="@string/width"
                 android:inputType="numberDecimal"
                 android:selectAllOnFocus="true"
-                android:singleLine="true" />
+                android:singleLine="true"
+                tools:text="@string/width" />
         </android.support.design.widget.TextInputLayout>
 
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/projectItemNameTVLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/projectItemNameTVLabel"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/projectItemListNameTVLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/projectItemListNameTVLabel"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@+id/projectItemNameTVLabel"
+        app:layout_constraintTop_toBottomOf="@+id/projectItemNameTVLabel" />
 
     <!--Input Group End-->
 
