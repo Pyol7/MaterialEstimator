@@ -9,24 +9,23 @@ import com.jeffreyromero.materialestimator.models.ProjectItem;
 import com.jeffreyromero.materialestimator.models.defaultProjectItems.DroppedCeiling;
 import com.jeffreyromero.materialestimator.models.defaultProjectItems.DrywallCeiling;
 import com.jeffreyromero.materialestimator.models.defaultProjectItems.DrywallPartition;
-import com.jeffreyromero.materialestimator.models.droppedCeiling.CeilingTile;
-import com.jeffreyromero.materialestimator.models.droppedCeiling.CrossTeeLong;
-import com.jeffreyromero.materialestimator.models.droppedCeiling.CrossTeeShort;
-import com.jeffreyromero.materialestimator.models.droppedCeiling.MainTee;
-import com.jeffreyromero.materialestimator.models.drywall.fasteners.FramingFastener;
-import com.jeffreyromero.materialestimator.models.drywall.fasteners.MainChannelFastener;
-import com.jeffreyromero.materialestimator.models.drywall.fasteners.PanelFastener;
-import com.jeffreyromero.materialestimator.models.drywall.fasteners.TrackFastener;
-import com.jeffreyromero.materialestimator.models.drywall.materials.FurringChannel;
-import com.jeffreyromero.materialestimator.models.drywall.materials.Hanger;
-import com.jeffreyromero.materialestimator.models.drywall.materials.MainChannel;
-import com.jeffreyromero.materialestimator.models.drywall.materials.JointCompound;
-import com.jeffreyromero.materialestimator.models.drywall.fasteners.WallAngleFastener;
-import com.jeffreyromero.materialestimator.models.drywall.materials.WallAngle;
-import com.jeffreyromero.materialestimator.models.drywall.materials.Stud;
-import com.jeffreyromero.materialestimator.models.drywall.materials.Track;
-import com.jeffreyromero.materialestimator.models.drywall.materials.Panel;
+import com.jeffreyromero.materialestimator.models.quantifiables.CeilingTile;
+import com.jeffreyromero.materialestimator.models.quantifiables.Tee;
+import com.jeffreyromero.materialestimator.models.non_quantifiables.MainSupportFastener;
+import com.jeffreyromero.materialestimator.models.non_quantifiables.PanelFastener;
+import com.jeffreyromero.materialestimator.models.quantifiables.TrackFastener;
+import com.jeffreyromero.materialestimator.models.quantifiables.FurringChannel;
+import com.jeffreyromero.materialestimator.models.quantifiables.Hanger;
+import com.jeffreyromero.materialestimator.models.quantifiables.MainSupport;
+import com.jeffreyromero.materialestimator.models.quantifiables.JointCompound;
+import com.jeffreyromero.materialestimator.models.quantifiables.WallAngleFastener;
+import com.jeffreyromero.materialestimator.models.quantifiables.WallAngle;
+import com.jeffreyromero.materialestimator.models.quantifiables.Stud;
+import com.jeffreyromero.materialestimator.models.quantifiables.Track;
+import com.jeffreyromero.materialestimator.models.quantifiables.Panel;
 import com.jeffreyromero.materialestimator.models.MaterialList;
+import com.jeffreyromero.materialestimator.models.floorFinishes.FloorFinish;
+import com.jeffreyromero.materialestimator.models.floorFinishes.Tile;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -46,30 +45,32 @@ public class Deserializer {
     private static Gson gson;
 
     static {
+        // FloorFinish
+        GsonRuntimeTypeAdapterFactory<FloorFinish> FloorFinishTypeAdapter = GsonRuntimeTypeAdapterFactory
+                .of(FloorFinish.class, "subType")
+                .registerSubtype(Tile.class);
+
         // BaseMaterial
         GsonRuntimeTypeAdapterFactory<BaseMaterial> BaseMaterialTypeAdapter = GsonRuntimeTypeAdapterFactory
-                .of(BaseMaterial.class, "type")
-                .registerSubtype(WallAngle.class, "Wall Angle")
-                .registerSubtype(WallAngleFastener.class, "Wall Angle Fastener")
-                .registerSubtype(Hanger.class, "Hanger")
-                .registerSubtype(MainChannel.class, "Main Channel")
-                .registerSubtype(MainChannelFastener.class, "Main Channel Fastener")
-                .registerSubtype(FurringChannel.class, "Furring Channel")
-                .registerSubtype(FramingFastener.class, "Framing Fastener")
-                .registerSubtype(Stud.class, "Stud")
-                .registerSubtype(Track.class, "Track")
-                .registerSubtype(TrackFastener.class, "Track Fastener")
-                .registerSubtype(Panel.class,"Panel")
-                .registerSubtype(PanelFastener.class, "Panel Fastener")
-                .registerSubtype(JointCompound.class, "Joint Compound")
-                .registerSubtype(CeilingTile.class,"Ceiling Tile")
-                .registerSubtype(MainTee.class,"Main Tee")
-                .registerSubtype(CrossTeeLong.class,"Cross Tee Long")
-                .registerSubtype(CrossTeeShort.class,"Cross Tee Short");
+                .of(BaseMaterial.class, "subType")
+                .registerSubtype(WallAngle.class)
+                .registerSubtype(WallAngleFastener.class)
+                .registerSubtype(Hanger.class)
+                .registerSubtype(MainSupport.class)
+                .registerSubtype(MainSupportFastener.class)
+                .registerSubtype(FurringChannel.class)
+                .registerSubtype(Stud.class)
+                .registerSubtype(Track.class)
+                .registerSubtype(TrackFastener.class)
+                .registerSubtype(Panel.class)
+                .registerSubtype(PanelFastener.class)
+                .registerSubtype(JointCompound.class)
+                .registerSubtype(CeilingTile.class)
+                .registerSubtype(Tee.class);
 
         // ProjectItem
         GsonRuntimeTypeAdapterFactory<ProjectItem> ProjectItemTypeAdapter = GsonRuntimeTypeAdapterFactory
-                .of(ProjectItem.class, "type")
+                .of(ProjectItem.class, "subType")
                 .registerSubtype(DroppedCeiling.class, "Dropped Ceiling")
                 .registerSubtype(DrywallCeiling.class, "Drywall Ceiling")
                 .registerSubtype(DrywallPartition.class, "Drywall Partition");

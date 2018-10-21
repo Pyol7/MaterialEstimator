@@ -415,7 +415,7 @@ public class ProjectFragment extends Fragment implements
 
             ItemVH(final View itemView) {
                 super(itemView);
-                nameTV = itemView.findViewById(R.id.nameLabelTV);
+                nameTV = itemView.findViewById(R.id.nameTV);
                 dimAreaTV = itemView.findViewById(R.id.dimAreaTV);
                 priceTV = itemView.findViewById(R.id.priceTV);
 

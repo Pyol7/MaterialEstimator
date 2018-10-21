@@ -65,8 +65,8 @@ public class ProjectItemFragment extends Fragment {
         getActivity().setTitle(projectItem.getName());
 
         //Get views and set values.
-        TextView nameTV = view.findViewById(R.id.nameLabelTV);
-        TextView lengthTV = view.findViewById(R.id.lengthET);
+        TextView nameTV = view.findViewById(R.id.nameTV);
+        TextView lengthTV = view.findViewById(R.id.unitPriceTV);
         TextView widthTV = view.findViewById(R.id.widthET);
         nameTV.setText(projectItem.getName());
         lengthTV.setText(String.valueOf(projectItem.getLength()));

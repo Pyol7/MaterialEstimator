@@ -1,19 +1,18 @@
 package com.jeffreyromero.materialestimator.models.defaultProjectItems;
 
 import com.jeffreyromero.materialestimator.models.BaseMaterial;
-import com.jeffreyromero.materialestimator.models.Material;
 import com.jeffreyromero.materialestimator.models.MaterialList;
 import com.jeffreyromero.materialestimator.models.ProjectItem;
-import com.jeffreyromero.materialestimator.models.drywall.fasteners.FramingFastener;
-import com.jeffreyromero.materialestimator.models.drywall.fasteners.MainChannelFastener;
-import com.jeffreyromero.materialestimator.models.drywall.materials.FurringChannel;
-import com.jeffreyromero.materialestimator.models.drywall.materials.Hanger;
-import com.jeffreyromero.materialestimator.models.drywall.materials.MainChannel;
-import com.jeffreyromero.materialestimator.models.drywall.materials.JointCompound;
-import com.jeffreyromero.materialestimator.models.drywall.materials.Panel;
-import com.jeffreyromero.materialestimator.models.drywall.fasteners.PanelFastener;
-import com.jeffreyromero.materialestimator.models.drywall.materials.WallAngle;
-import com.jeffreyromero.materialestimator.models.drywall.fasteners.WallAngleFastener;
+import com.jeffreyromero.materialestimator.models.Quantifiable;
+import com.jeffreyromero.materialestimator.models.non_quantifiables.MainSupportFastener;
+import com.jeffreyromero.materialestimator.models.quantifiables.FurringChannel;
+import com.jeffreyromero.materialestimator.models.quantifiables.Hanger;
+import com.jeffreyromero.materialestimator.models.quantifiables.MainSupport;
+import com.jeffreyromero.materialestimator.models.quantifiables.JointCompound;
+import com.jeffreyromero.materialestimator.models.quantifiables.Panel;
+import com.jeffreyromero.materialestimator.models.non_quantifiables.PanelFastener;
+import com.jeffreyromero.materialestimator.models.quantifiables.WallAngle;
+import com.jeffreyromero.materialestimator.models.quantifiables.WallAngleFastener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,12 +33,11 @@ public class DrywallCeiling extends ProjectItem {
         list.add(new WallAngle("Metal Wall Angles", 15.25, 120));
         list.add(new WallAngleFastener("Nails 3/4", 0.16,12));
         list.add(new Hanger("Wire 14g",8.50, 48));
-        list.add(new MainChannel("C Channels", 51.50, 192,48));
-        list.add(new MainChannelFastener("Tec Point Screws", 0.11));
-        list.add(new FurringChannel("Furring Channels",20.00,144,16));
-        list.add(new FramingFastener("Framing Screws", 0.14));
-        list.add(new Panel("Ultra Light Boards", 74.00, 96, 48, 8));
-        list.add(new PanelFastener("Drywall Screws", 0.20));
+        list.add(new MainSupport("C Channels", 51.50, 192,48, 12));
+        list.add(new MainSupportFastener("Tec Point Screws", 0.11));
+        list.add(new FurringChannel("Furring Channels",20.00,144, 16, 12));
+        list.add(new Panel("Ultra Light Boards", 74.00, 96, 48));
+        list.add(new PanelFastener("Drywall Screws", 0.20, 16));
         list.add(new JointCompound("Joint Compound All Purpose", 130.00,50400));
         return new MaterialList(list, generateNameFromClassName());
     }
@@ -66,28 +64,18 @@ public class DrywallCeiling extends ProjectItem {
                 );
                 tempList.add(panelFastener);
 
-            } else if (bm instanceof MainChannelFastener) {
-                MainChannelFastener mainChannelFastener = (MainChannelFastener) bm;
-                mainChannelFastener.calcFastenerQuantity(
+            } else if (bm instanceof MainSupportFastener) {
+                MainSupportFastener mainSupportFastener = (MainSupportFastener) bm;
+                mainSupportFastener.calcFastenerQuantity(
                         length,
                         width,
-                        ml.get(MainChannel.class),
+                        ml.get(MainSupport.class),
                         ml.get(FurringChannel.class)
                 );
-                tempList.add(mainChannelFastener);
-
-            } else if (bm instanceof FramingFastener) {
-                FramingFastener framingFastener = (FramingFastener) bm;
-                framingFastener.calcFastenerQuantity(
-                        length,
-                        width,
-                        ml.get(FurringChannel.class)
-                );
-                tempList.add(framingFastener);
-
+                tempList.add(mainSupportFastener);
             } else {
                 // Handle materials that implements Quantifiable
-                ((Material)bm).calcQuantity(length, width);
+                ((Quantifiable)bm).calcQuantity(length, width);
                 tempList.add(bm);
             }
         }

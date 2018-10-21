@@ -7,7 +7,7 @@
     android:background="@drawable/white_to_light_blue">
 
     <TextView
-        android:id="@+id/nameLabelTV"
+        android:id="@+id/nameTV"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -24,8 +24,8 @@
         android:layout_marginBottom="8dp"
         android:layout_marginTop="4dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/nameLabelTV"
-        app:layout_constraintTop_toBottomOf="@+id/nameLabelTV"
+        app:layout_constraintStart_toStartOf="@+id/nameTV"
+        app:layout_constraintTop_toBottomOf="@+id/nameTV"
         tools:text="12ft x 10ft (120ft2)" />
 
     <TextView

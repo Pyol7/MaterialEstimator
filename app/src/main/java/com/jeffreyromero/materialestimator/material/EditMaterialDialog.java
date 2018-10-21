@@ -7,44 +7,64 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.jeffreyromero.materialestimator.R;
 import com.jeffreyromero.materialestimator.data.Deserializer;
 import com.jeffreyromero.materialestimator.models.BaseMaterial;
 
+import java.util.Locale;
+
 
 /**
- * Displays the dialog for editing a BaseMaterial.
+ * Displays the dialog for editing a material.
  */
 public class EditMaterialDialog extends DialogFragment {
 
+    private static final String MATERIAL = "material";
+    private static final String POSITION = "position";
     private OnItemChangeListener onItemChangeListener;
-    private BaseMaterial selectedMaterial;
+    private BaseMaterial material;
+    private int position;
     private View dialogView;
     private Context context;
 
+    TextView nameTV;
+    EditText quantityET;
+    EditText unitPriceET;
+    EditText lengthET;
+    EditText widthET;
+    EditText spacingET;
+    EditText coefficientET;
+    SeekBar seekBar;
+
+    public EditMaterialDialog() {
+        // Required empty public constructor
+    }
+
     public interface OnItemChangeListener {
-        void onEditMaterialDialogSubmit(BaseMaterial material);
+        void onEditMaterialDialogSubmit(BaseMaterial material, int position);
     }
 
     /**
      * Used for editing a material.
      *
-     * @param inputMaterial the clicked material.
+     * @param material the clicked material.
      * @return the edited material.
      */
-    public static EditMaterialDialog newInstance(BaseMaterial inputMaterial) {
+    public static EditMaterialDialog newInstance(BaseMaterial material, int position) {
         EditMaterialDialog fragment = new EditMaterialDialog();
-        //Add input data to the bundle.
         Bundle args = new Bundle();
-        String inputMaterialJson = new Gson().toJson(inputMaterial);
-        args.putString("inputMaterial", inputMaterialJson);
-        //Set the bundle to the fragment and return it.
+        args.putString(MATERIAL, new Gson().toJson(material));
+        args.putInt(POSITION, position);
         fragment.setArguments(args);
         return fragment;
     }
@@ -59,19 +79,19 @@ public class EditMaterialDialog extends DialogFragment {
             onItemChangeListener = (OnItemChangeListener) getTargetFragment();
         } catch (ClassCastException e) {
             throw new ClassCastException(
-                    "The hosting Fragment must implement EditMaterialDialog.onItemChangeListener");
+                    "The hosting Fragment must implement EditMaterialDialog.OnItemChangeListener");
         }
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        String inputMaterialJson = null;
         try {
-            inputMaterialJson = getArguments().getString("inputMaterial");
+            String json = getArguments().getString(MATERIAL);
             //Make the input material the selected material.
-            this.selectedMaterial = Deserializer.toMaterial(inputMaterialJson);
-        } catch (NullPointerException e) {
+            this.material = Deserializer.toMaterial(json);
+            this.position = getArguments().getInt(POSITION);
+        } catch (Exception e) {
             Log.e("EditMaterialDialog", e.getMessage());
         }
     }
@@ -83,18 +103,63 @@ public class EditMaterialDialog extends DialogFragment {
         dialogView = getActivity().getLayoutInflater()
                 .inflate(R.layout.edit_material_dialog, null);
 
+        // Get individual views
+        nameTV = dialogView.findViewById(R.id.nameTV);
+        quantityET = dialogView.findViewById(R.id.quantityET);
+        unitPriceET = dialogView.findViewById(R.id.unitPriceET);
+        // Add a text change listener to detect when a value of -1 (or -1.0) is set.
+        // Which indicates that a field is not used therefore should be hidden.
+        lengthET = dialogView.findViewById(R.id.lengthET);
+        lengthET.addTextChangedListener(
+                new inputValidator(dialogView.findViewById(R.id.lengthLabelTV), lengthET)
+        );
+        widthET = dialogView.findViewById(R.id.widthET);
+        widthET.addTextChangedListener(
+                new inputValidator(dialogView.findViewById(R.id.widthLabelTV), widthET)
+        );
+        spacingET = dialogView.findViewById(R.id.spacingET);
+        spacingET.addTextChangedListener(
+                new inputValidator(dialogView.findViewById(R.id.spacingLabelTV), spacingET)
+        );
+        coefficientET = dialogView.findViewById(R.id.coefficientET);
+        coefficientET.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                //todo - sanitize user input
+                // This controls the seek bar via user input
+                if (!(s.toString().equals("") || s.toString().equals("."))){
+                    seekBar.setProgress(Integer.valueOf(s.toString()));
+                    updateQuantity();
+                }
+            }
+        });
+
+        // Build the dialog view
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
         dialogBuilder.setView(dialogView);
-        dialogBuilder.setTitle("Edit BaseMaterial");
+        dialogBuilder.setTitle("Edit Material");
         dialogBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
 
-                //Update the selected material with user input values.
-                EditText priceET = dialogView.findViewById(R.id.priceET);
-                selectedMaterial.setUnitPrice(Integer.valueOf(priceET.getText().toString()));
-                //Send the new selected material to the listener.
-                onItemChangeListener.onEditMaterialDialogSubmit(selectedMaterial);
+                // todo - check for empty submission
+
+                // Update material with user input
+                material.setQuantity(Double.valueOf(quantityET.getText().toString()));
+                material.setUnitPrice(Double.valueOf(unitPriceET.getText().toString()));
+                material.setLength(Double.valueOf(lengthET.getText().toString()));
+                material.setWidth(Double.valueOf(widthET.getText().toString()));
+                material.setSpacing(Integer.valueOf(spacingET.getText().toString()));
+                material.setCoefficient(toCoefficient(seekBar.getProgress()));
+
+                // Send the updated material to the listener.
+                onItemChangeListener.onEditMaterialDialogSubmit(material, position);
 
             }
         });
@@ -105,28 +170,116 @@ public class EditMaterialDialog extends DialogFragment {
             }
         });
 
-        setDataToViews(dialogView, selectedMaterial);
+        seekBar = dialogView.findViewById(R.id.coefficientSB);
+        seekBar.setOnSeekBarChangeListener(new CoefficientSeekBarChangeListener());
+
+        setDataToViews(material);
 
         return dialogBuilder.create();
     }
 
-    private void setDataToViews(View view, BaseMaterial selectedMaterial) {
-        //Get views.
-        TextView nameTV = view.findViewById(R.id.nameLabelTV);
-        EditText priceET = view.findViewById(R.id.priceET);
-        priceET.clearFocus();
-        TextView lengthTV = view.findViewById(R.id.lengthET);
-        TextView widthTV = view.findViewById(R.id.widthET);
+    private class CoefficientSeekBarChangeListener implements SeekBar.OnSeekBarChangeListener {
 
-        //Set values.
-        nameTV.setText(selectedMaterial.getName());
-        priceET.setText(String.valueOf(selectedMaterial.getPrice()));
-        lengthTV.setText(String.valueOf(selectedMaterial.getLength()));
-        widthTV.setText(String.valueOf(selectedMaterial.getWidth()));
+        /**
+         * Notification that the progress level has changed. Clients can use the fromUser parameter
+         * to distinguish user-initiated changes from those that occurred programmatically.
+         */
+        @Override
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+            if (fromUser && material.getCoefficient() != toCoefficient(seekBar.getProgress())){
+                coefficientET.setText(String.valueOf(seekBar.getProgress()));
+                updateQuantity();
+            }
+        }
+
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) { }
+
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) { }
+
     }
 
-    public EditMaterialDialog() {
-        // Required empty public constructor
+    // Actual progress:                 Min=0, Max=50
+    // As Coefficient ((p/100) + 1):    Min=1, Max=1.5
+    private double toCoefficient(int progress){
+        return ((double)progress / 100) + 1;
+    }
+
+    private void updateQuantity(){
+        if (material.getCoefficient() != toCoefficient(seekBar.getProgress())){
+            double newQuantity =
+                    material.getQuantity() * toCoefficient(seekBar.getProgress());
+            quantityET.setText(String.format(Locale.US,"%.1f", newQuantity));
+//            Toast.makeText(context, "quantity updated", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void setDataToViews(BaseMaterial material) {
+        nameTV.setText(
+                material.getName()
+        );
+        quantityET.setText(
+                String.format(Locale.US,"%.1f", material.getQuantity())
+        );
+        unitPriceET.setText(
+                String.format(Locale.US,"%.2f",material.getUnitPrice())
+        );
+        lengthET.setText(
+                String.format(Locale.US,"%.1f",material.getLength())
+        );
+        widthET.setText(
+                String.format(Locale.US,"%.1f",material.getWidth())
+        );
+        spacingET.setText(
+                String.valueOf(material.getSpacing())
+        );
+        // This textChangeListener is activated which updates the seekBar
+        coefficientET.setText(
+                String.format(Locale.US,"%.0f", (material.getCoefficient() - 1) * 100));
+    }
+
+    private class inputValidator implements TextWatcher {
+
+        private String beforeText;
+        private View labelTV;
+        private EditText inputET;
+
+        public inputValidator(View labelTV, EditText inputET) {
+            this.labelTV = labelTV;
+            this.inputET = inputET;
+        }
+
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            // Don't store an empty string
+            if (!s.toString().equals("")) {
+                this.beforeText = s.toString();
+            }
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            // Hide the view that has a value of -1 or -1.0
+            String text = s.toString();
+            if (text.equals(String.valueOf(-1)) ||
+                    String.valueOf(s).equals(String.valueOf(-1.0))){
+                labelTV.setVisibility(View.GONE);
+                inputET.setVisibility(View.GONE);
+            }
+            // Prohibit zero input
+            if (text.equals(String.valueOf(0)) || text.equals(".")){
+                Toast.makeText(
+                        context,
+                        "Enter a value greater than zero",
+                        Toast.LENGTH_LONG
+                ).show();
+                inputET.setText(beforeText);
+            }
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) { }
     }
 
     @Override

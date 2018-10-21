@@ -2,8 +2,8 @@ package com.jeffreyromero.materialestimator.models;
 
 import org.apache.commons.lang3.StringUtils;
 
-public abstract class ProjectItem {
-    private String type;
+public abstract class ProjectItem implements IProjectItem{
+    private String subType;
     private MaterialList materialList;
     private double totalPrice;
     protected double length;
@@ -11,15 +11,14 @@ public abstract class ProjectItem {
     protected double height;
     protected String name;
 
-    protected ProjectItem(String type, String name) {
-        this.type = type;
+    protected ProjectItem(String subType, String name) {
+        this.subType = subType;
         this.name = name;
     }
 
-    public abstract MaterialList initMaterialList();
-    public abstract void calcQuantities(double x, double y);
-    public abstract String getXHintText();
-    public abstract String getYHintText();
+    public String getSubType() {
+        return subType;
+    }
 
     public MaterialList getMaterialList() {
         return materialList;

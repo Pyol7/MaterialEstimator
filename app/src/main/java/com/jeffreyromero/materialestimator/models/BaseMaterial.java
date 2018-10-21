@@ -1,13 +1,13 @@
 package com.jeffreyromero.materialestimator.models;
 
 /**
- * The type field is used by Gson to identify subtypes for deserialization.
- * All subtypes must provide a String field called type and that type must be registered with
- * an instance of GsonRuntimeTypeAdapterFactory(Deserializer.class in this case).
+ * The subType field is used by Gson to identify subTypes for deserialization.
+ * All subTypes must use their class name for the subType field and must be registered with
+ * their parent class TypeAdapter (see Deserializer.class).
  *
  */
-public abstract class BaseMaterial {
-    protected String type;
+public abstract class BaseMaterial{
+    protected String subType;
     protected String name;
     protected double unitPrice;
     protected double length;
@@ -15,60 +15,68 @@ public abstract class BaseMaterial {
     protected int spacing;
     protected double quantity;
     protected double price;
+    protected double coefficient;
 
-    protected BaseMaterial(String type, String name, double unitPrice, double length, double width, int spacing) {
-        this.type = type;
+    protected BaseMaterial(String subType,
+                           String name,
+                           double unitPrice)
+    {
+        this(subType, name, unitPrice, -1);
+    }
+
+    protected BaseMaterial(String subType,
+                           String name,
+                           double unitPrice,
+                           int spacing)
+    {
+        this(subType, name, unitPrice, -1,-1, spacing);
+    }
+
+    protected BaseMaterial(String subType,
+                           String name,
+                           double unitPrice,
+                           double length)
+    {
+        this(subType, name, unitPrice, length, -1);
+    }
+
+    protected BaseMaterial(String subType,
+                           String name,
+                           double unitPrice,
+                           double length,
+                           int spacing)
+    {
+        this(subType, name, unitPrice, length, -1, spacing);
+    }
+
+    protected BaseMaterial(String subType,
+                           String name,
+                           double unitPrice,
+                           double length,
+                           double width)
+    {
+        this(subType, name, unitPrice, length, width,-1);
+    }
+
+    protected BaseMaterial(String subType,
+                           String name,
+                           double unitPrice,
+                           double length,
+                           double width,
+                           int spacing)
+    {
+        this.subType = subType;
         this.name = name;
         this.unitPrice = unitPrice;
         this.length = length;
         this.width = width;
         this.spacing = spacing;
         this.price = getQuantity()*getUnitPrice();
+        this.coefficient = 1;
     }
 
-    protected BaseMaterial(String type, String name, double unitPrice, double length, double width) {
-        this.type = type;
-        this.name = name;
-        this.unitPrice = unitPrice;
-        this.length = length;
-        this.width = width;
-        this.price = getQuantity()*getUnitPrice();
-    }
-
-    protected BaseMaterial(String type, String name, double unitPrice, double length, int spacing) {
-        this.type = type;
-        this.name = name;
-        this.unitPrice = unitPrice;
-        this.length = length;
-        this.spacing = spacing;
-        this.price = getQuantity()*getUnitPrice();
-    }
-
-    protected BaseMaterial(String type, String name, double unitPrice, double length) {
-        this.type = type;
-        this.name = name;
-        this.unitPrice = unitPrice;
-        this.length = length;
-        this.price = getQuantity()*getUnitPrice();
-    }
-
-    protected BaseMaterial(String type, String name, double unitPrice, int spacing) {
-        this.type = type;
-        this.name = name;
-        this.unitPrice = unitPrice;
-        this.spacing = spacing;
-        this.price = getQuantity()*getUnitPrice();
-    }
-
-    protected BaseMaterial(String type, String name, double unitPrice) {
-        this.type = type;
-        this.name = name;
-        this.unitPrice = unitPrice;
-        this.price = getQuantity()*getUnitPrice();
-    }
-
-    public String getType() {
-        return type;
+    public String getSubType() {
+        return subType;
     }
 
     public String getName() {
@@ -104,6 +112,14 @@ public abstract class BaseMaterial {
         this.width = width;
     }
 
+    public int getSpacing() {
+        return spacing;
+    }
+
+    public void setSpacing(int spacing) {
+        this.spacing = spacing;
+    }
+
     public double getQuantity() {
         return quantity;
     }
@@ -118,13 +134,12 @@ public abstract class BaseMaterial {
         return price;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
+    public double getCoefficient() {
+        return coefficient;
+    }
 
-        BaseMaterial material = (BaseMaterial) o;
-
-        return name != null ? name.equals(material.name) : material.name == null;
+    public void setCoefficient(double coefficient) {
+        this.coefficient = coefficient;
     }
 
     @Override
@@ -132,11 +147,4 @@ public abstract class BaseMaterial {
         return name;
     }
 
-    public int getSpacing() {
-        return spacing;
-    }
-
-    public void setSpacing(int spacing) {
-        this.spacing = spacing;
-    }
 }

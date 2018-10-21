@@ -7,9 +7,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -28,8 +25,10 @@ import com.jeffreyromero.materialestimator.MainActivity;
 import com.jeffreyromero.materialestimator.R;
 import com.jeffreyromero.materialestimator.data.Deserializer;
 import com.jeffreyromero.materialestimator.data.ProjectItemsSharedPreferences;
+import com.jeffreyromero.materialestimator.material.EditMaterialDialog;
 import com.jeffreyromero.materialestimator.material.SingleSelectDialog;
 import com.jeffreyromero.materialestimator.models.BaseMaterial;
+import com.jeffreyromero.materialestimator.models.MaterialList;
 import com.jeffreyromero.materialestimator.models.ProjectItem;
 import com.jeffreyromero.materialestimator.models.defaultProjectItems.DroppedCeiling;
 import com.jeffreyromero.materialestimator.models.defaultProjectItems.DrywallCeiling;
@@ -44,7 +43,8 @@ import java.util.Locale;
  */
 public class ProjectItemCreatorFragment extends Fragment implements
         SingleSelectDialog.OnDialogSubmitListener,
-        SingleInputDialog.OnDialogSubmitListener {
+        SingleInputDialog.OnDialogSubmitListener,
+        EditMaterialDialog.OnItemChangeListener {
 
     private static final double FEET_TO_INCHES = 12;
     private static final String PROJECT_NAME = "projectName";
@@ -158,7 +158,7 @@ public class ProjectItemCreatorFragment extends Fragment implements
         projectItemListNameTV.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showProjectItemSelectDialog();
+                ShowSingleSelectDialogForProjectItems();
             }
         });
 
@@ -174,7 +174,7 @@ public class ProjectItemCreatorFragment extends Fragment implements
             @Override
             public void onClick(View v) {
                 // Get input views
-                lengthET = view.findViewById(R.id.lengthET);
+                lengthET = view.findViewById(R.id.unitPriceTV);
                 widthET = view.findViewById(R.id.widthET);
                 // Check the length of the input text to determine if its empty.
                 int lengthSize = lengthET.getText().toString().trim().length();
@@ -241,7 +241,7 @@ public class ProjectItemCreatorFragment extends Fragment implements
         widthET.clearFocus();
     }
 
-    private void showProjectItemSelectDialog (){
+    private void ShowSingleSelectDialogForProjectItems(){
         SingleSelectDialog f = SingleSelectDialog.newInstance(
                 getString(R.string.select_project_item_type_dialog_title),
                 projectItemsSP.getAllKeys(),
@@ -250,6 +250,34 @@ public class ProjectItemCreatorFragment extends Fragment implements
         f.setTargetFragment(ProjectItemCreatorFragment.this, 0);
         f.show(getActivity().getSupportFragmentManager(), f.getClass().getSimpleName());
     }
+
+    @Override
+    public void OnSingleSelectDialogSubmit(int selectedProjectItemPosition) {
+        this.selectedProjectItemPosition = selectedProjectItemPosition;
+        // Store the selected position to activity SP.
+        activitySP.edit().putInt(
+                getString(R.string.selected_project_item_position_key),
+                selectedProjectItemPosition
+        ).apply();
+        ProjectItem selectedProjectItem = projectItemsSP.get(selectedProjectItemPosition);
+        // Keep user provided name
+        selectedProjectItem.setName(projectItem.getName());
+        projectItem = selectedProjectItem;
+        // Set projectItemListNameTV text
+        TextView projectItemListNameTV = view.findViewById(R.id.projectItemListNameTV);
+        projectItemListNameTV.setText(projectItem.getMaterialList().getName());
+        setHints();
+        adapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onEditMaterialDialogSubmit(BaseMaterial material, int position) {
+        MaterialList ml = projectItem.getMaterialList();
+        ml.replace(position, material);
+        projectItem.calcTotalPrice();
+        adapter.notifyDataSetChanged();
+    }
+
 
     private void showAddProjectItemMessageDialog() {
         //Create and show dialog.
@@ -276,21 +304,6 @@ public class ProjectItemCreatorFragment extends Fragment implements
         projectItemNameTV.setText(newName);
     }
 
-    @Override
-    public void OnSingleSelectDialogSubmit(int selectedProjectItemPosition) {
-        this.selectedProjectItemPosition = selectedProjectItemPosition;
-        // Store the selected position to activity SP.
-        activitySP.edit().putInt(
-                getString(R.string.selected_project_item_position_key),
-                selectedProjectItemPosition
-        ).apply();
-        ProjectItem selectedProjectItem = projectItemsSP.get(selectedProjectItemPosition);
-        // Keep user provided name
-        selectedProjectItem.setName(projectItem.getName());
-        projectItem = selectedProjectItem;
-        setHints();
-        adapter.notifyDataSetChanged();
-    }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -421,11 +434,22 @@ public class ProjectItemCreatorFragment extends Fragment implements
             TextView quantityUnitPriceTV;
             TextView priceTV;
 
-            ItemVH(final View itemView) {
+            ItemVH(View itemView) {
                 super(itemView);
-                nameTV = itemView.findViewById(R.id.nameLabelTV);
+                nameTV = itemView.findViewById(R.id.nameTV);
                 quantityUnitPriceTV = itemView.findViewById(R.id.quantityUnitPriceTV);
                 priceTV = itemView.findViewById(R.id.priceTV);
+                itemView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        // Get item at position
+                        BaseMaterial bm = projectItem.getMaterialList().get(getAdapterPosition());
+                        // Show EditMaterialDialog
+                        EditMaterialDialog f = EditMaterialDialog.newInstance(bm, getAdapterPosition());
+                        f.setTargetFragment(ProjectItemCreatorFragment.this, 0);
+                        f.show(getActivity().getSupportFragmentManager(), f.getClass().getSimpleName());
+                    }
+                });
             }
         }
 
