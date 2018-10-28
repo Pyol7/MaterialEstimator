@@ -19,6 +19,6 @@ public class Track extends BaseMaterial implements Quantifiable {
 
     @Override
     public double calcQuantity(double length, double width) {
-        return super.setQuantity(length/getLength()*2);
+        return super.setQuantity(length / getLength() * 2 * getCoefficient());
     }
 }

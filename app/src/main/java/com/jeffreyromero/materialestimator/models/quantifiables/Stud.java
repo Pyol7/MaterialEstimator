@@ -21,6 +21,6 @@ public class Stud extends BaseMaterial implements Quantifiable {
     public double calcQuantity(double length, double height) {
         double pieces = length / getSpacing();
         double lengths = height/getLength();
-        return super.setQuantity(pieces*lengths);
+        return super.setQuantity(pieces * lengths * getCoefficient());
     }
 }

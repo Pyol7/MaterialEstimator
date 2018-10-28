@@ -23,8 +23,7 @@ public class JointCompound extends BaseMaterial implements Quantifiable {
     @Override
     public double calcQuantity(double length, double width) {
         double area = length * width;
-        double q = area / coverage;
-        return super.setQuantity(q);
+        return super.setQuantity(area / coverage * getCoefficient());
     }
 
     public int getCoverage() {

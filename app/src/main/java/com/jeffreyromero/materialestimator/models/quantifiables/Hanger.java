@@ -19,7 +19,8 @@ public class Hanger extends BaseMaterial implements Quantifiable {
 
     @Override
     public double calcQuantity(double length, double width) {
-        double q = Math.ceil((length / getSpacing() - 1 ) * (width / getSpacing() - 1));
+        double q = Math.ceil(
+                (length / getSpacing() - 1 ) * (width / getSpacing() - 1)) * getCoefficient();
         return super.setQuantity((q%2 != 0) ? q+1 : q);
     }
 }

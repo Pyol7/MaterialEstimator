@@ -13,6 +13,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.FileProvider;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v7.widget.Toolbar;
 import android.view.ActionMode;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.ShareActionProvider;
@@ -31,9 +32,9 @@ import com.jeffreyromero.materialestimator.MainActivity;
 import com.jeffreyromero.materialestimator.R;
 import com.jeffreyromero.materialestimator.data.Deserializer;
 import com.jeffreyromero.materialestimator.data.ProjectsDataSource;
+import com.jeffreyromero.materialestimator.models.BaseItem;
 import com.jeffreyromero.materialestimator.models.BaseMaterial;
 import com.jeffreyromero.materialestimator.models.Project;
-import com.jeffreyromero.materialestimator.models.ProjectItem;
 import com.jeffreyromero.materialestimator.utilities.CustomRecyclerView;
 import com.jeffreyromero.materialestimator.utilities.PrimaryActionModeCallBack;
 
@@ -46,17 +47,18 @@ import java.util.Locale;
  * Receives a Project from MainActivity and displays it.
  */
 public class ProjectFragment extends Fragment implements
-        ProjectItemCreatorFragment.OnFragmentInteractionListener {
+        ItemCreatorFragment.OnFragmentInteractionListener {
 
     private static final String LOG_TAG = ProjectFragment.class.getSimpleName();
     private static final double INCHES_TO_FEET = 0.0833;
     private static final String PROJECT = "project";
     private ShareActionProvider mShareActionProvider;
     private MaterialListAdapter materialListAdapter;
-    private ProjectItemAdapter projectItemAdapter;
     private OnItemClickListener mListener;
+    private ProjectsDataSource projectsSP;
+    private ItemAdapter ItemAdapter;
     private Project project;
-    private Context context;
+    private MainActivity mainActivity;
     private View view;
 
     public ProjectFragment() {
@@ -73,13 +75,12 @@ public class ProjectFragment extends Fragment implements
     }
 
     public interface OnItemClickListener {
-        void onProjectFragmentProjectItemClick(ProjectItem projectItem);
+        void onProjectFragmentItemClick(BaseItem item);
     }
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        this.context = context;
         //Get the hosting activity to implement this callback interface.
         if (context instanceof ProjectFragment.OnItemClickListener) {
             mListener = (OnItemClickListener) context;
@@ -93,6 +94,15 @@ public class ProjectFragment extends Fragment implements
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Use MainActivity as context
+        mainActivity = (MainActivity)getActivity();
+
+        // Init project item shared preferences
+        projectsSP = new ProjectsDataSource(
+                getString(R.string.projects_key),
+                mainActivity
+        );
+
         if (savedInstanceState == null){
             // Use the passed in project
             if (getArguments() != null) {
@@ -105,24 +115,31 @@ public class ProjectFragment extends Fragment implements
         }
 
         // Init list adapters
-        projectItemAdapter = new ProjectItemAdapter();
+        ItemAdapter = new ItemAdapter();
         materialListAdapter = new MaterialListAdapter();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        //Show options menu.
-        setHasOptionsMenu(true);
-
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.project_fragment, container, false);
 
-        // Enable up navigation for this fragment
-        ((MainActivity)getActivity()).enableDrawerNavigation();
+        // Get this fragment's toolbar and set it as the action bar in MainActivity.
+        Toolbar toolbar = view.findViewById(R.id.toolbar);
+        mainActivity.setSupportActionBar(toolbar);
 
-        //Set a title to the toolbar.
-        getActivity().setTitle(project.getName());
+        // Hide default title which shows the app name.
+        mainActivity.getSupportActionBar().setDisplayShowTitleEnabled(false);
+
+        // Show custom title
+        toolbar.setTitle(project.getName());
+
+        // Make this fragment's options visible on the main menu
+        setHasOptionsMenu(true);
+
+        // Enable up navigation for this fragment
+        mainActivity.enableDrawerNavigation(false);
 
         //Set client, location, dateCreated and description.
         TextView clientTV = view.findViewById(R.id.clientTV);
@@ -135,7 +152,7 @@ public class ProjectFragment extends Fragment implements
         //Set up the recyclerView.
         CustomRecyclerView rv = view.findViewById(R.id.customRecyclerView);
         rv.setEmptyView(view.findViewById(R.id.emptyView));
-        rv.setAdapter(projectItemAdapter);
+        rv.setAdapter(ItemAdapter);
 
         return view;
     }
@@ -147,26 +164,29 @@ public class ProjectFragment extends Fragment implements
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-        // Persist the current project
-        ProjectsDataSource pds = new ProjectsDataSource(context);
-        pds.put(project);
-    }
-
-    @Override
     public void onDetach() {
         super.onDetach();
         mListener = null;
     }
 
+    private void showItemCreatorFragment() {
+        // Show the ItemCreatorFragment
+        ItemCreatorFragment f = ItemCreatorFragment.newInstance(project.getName());
+        f.setTargetFragment(ProjectFragment.this, 0);
+        FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.fragment_container, f, f.getClass().getSimpleName());
+        transaction.addToBackStack(f.getClass().getSimpleName());
+        transaction.commit();
+    }
+
     @Override
-    public void onProjectItemCreated(ProjectItem projectItem) {
-        // Add the created ProjectItem to the current Project
-        project.addProjectItem(projectItem);
-        projectItemAdapter.notifyItemInserted(project.getProjectItems().size());
+    public void onItemCreated(BaseItem item) {
+        // Add the created item to the current Project
+        project.addItem(item);
+        ItemAdapter.notifyItemInserted(project.getItems().size());
         //TODO - Create stackOverflow background animation.
-        Toast.makeText(context, "New Item Created", Toast.LENGTH_SHORT).show();
+        Toast.makeText(mainActivity, "New item created", Toast.LENGTH_SHORT).show();
+        projectsSP.put(project.getName(), project);
     }
 
     @Override
@@ -180,8 +200,13 @@ public class ProjectFragment extends Fragment implements
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case android.R.id.home:
+                // Provide functionality for the home icon.
+                // Used when enableDrawerNavigation = false
+                mainActivity.onBackPressed();
+                return true;
             case R.id.action_add:
-                showProjectItemCreator();
+                showItemCreatorFragment();
                 return true;
             case R.id.action_share:
                 setShareIntent(createIntent());
@@ -242,7 +267,7 @@ public class ProjectFragment extends Fragment implements
             shareIntent.setAction(Intent.ACTION_SEND);
             //Temp permission for receiving app to read this file
             shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            shareIntent.setDataAndType(contentUri, context.getContentResolver().getType(contentUri));
+            shareIntent.setDataAndType(contentUri, mainActivity.getContentResolver().getType(contentUri));
             shareIntent.putExtra(Intent.EXTRA_STREAM, contentUri);
             shareIntent.setType("image/jpg");
             return shareIntent;
@@ -303,22 +328,12 @@ public class ProjectFragment extends Fragment implements
 
     private void showProjectItemView(){
         CustomRecyclerView rv = view.findViewById(R.id.customRecyclerView);
-        rv.setAdapter(projectItemAdapter);
+        rv.setAdapter(ItemAdapter);
     }
 
-    private void showProjectItemCreator() {
-        // Show the ProjectItemCreatorFragment
-        ProjectItemCreatorFragment f = ProjectItemCreatorFragment.newInstance(project.getName());
-        f.setTargetFragment(ProjectFragment.this, 0);
-        FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.fragment_container, f, f.getClass().getSimpleName());
-        transaction.addToBackStack(f.getClass().getSimpleName());
-        transaction.commit();
-    }
+    //------------------------------- ItemAdapter -------------------------------//
 
-    //------------------------------- ProjectItemAdapter -------------------------------//
-
-    public class ProjectItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+    public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         //View types
         private final int ITEM_VIEW = 0;
         private final int TOTAL_VIEW = 1;
@@ -327,10 +342,10 @@ public class ProjectFragment extends Fragment implements
 
         @Override
         public int getItemCount() {
-            if (project.getProjectItems() == null | project.getProjectItems().size() == 0) {
+            if (project.getItems() == null | project.getItems().size() == 0) {
                 return 0;
             } else {
-                return project.getProjectItems().size() + 1;
+                return project.getItems().size() + 1;
             }
         }
 
@@ -349,12 +364,12 @@ public class ProjectFragment extends Fragment implements
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             if (viewType == ITEM_VIEW) {
                 //Inflate the ITEM_VIEW.
-                return new ItemVH(LayoutInflater.from(context).inflate(
+                return new ItemVH(LayoutInflater.from(mainActivity).inflate(
                         R.layout.project_list_item, parent, false));
 
             } else if (viewType == TOTAL_VIEW) {
                 //Inflate the TOTAL_VIEW.
-                return new TotalVH(LayoutInflater.from(context).inflate(
+                return new TotalVH(LayoutInflater.from(mainActivity).inflate(
                         R.layout.total_list_item, parent, false));
 
             } else {
@@ -368,7 +383,7 @@ public class ProjectFragment extends Fragment implements
             switch (holder.getItemViewType()) {
 
                 case ITEM_VIEW:
-                    ProjectItem pi = project.getProjectItems().get(position);
+                    BaseItem pi = project.getItems().get(position);
                     ItemVH itemVH = (ItemVH) holder;
 //                    if (position % 2 == 0) {
 //                        itemVH.itemView.setBackground(
@@ -415,7 +430,7 @@ public class ProjectFragment extends Fragment implements
 
             ItemVH(final View itemView) {
                 super(itemView);
-                nameTV = itemView.findViewById(R.id.nameTV);
+                nameTV = itemView.findViewById(R.id.toolbarTitle);
                 dimAreaTV = itemView.findViewById(R.id.dimAreaTV);
                 priceTV = itemView.findViewById(R.id.priceTV);
 
@@ -424,8 +439,8 @@ public class ProjectFragment extends Fragment implements
                     public void onClick(View v) {
 
                         //Inform mListener show ic_project item.
-                        mListener.onProjectFragmentProjectItemClick(
-                                project.getProjectItems().get(getAdapterPosition()));
+                        mListener.onProjectFragmentItemClick(
+                                project.getItems().get(getAdapterPosition()));
 
                     }
                 });
@@ -453,9 +468,11 @@ public class ProjectFragment extends Fragment implements
 
             @Override
             public void deleteItem(int position) {
-                project.deleteProjectItem(position);
-                projectItemAdapter.notifyItemRemoved(position);
-                projectItemAdapter.notifyItemChanged(getItemCount() == 0 ? 0 : getItemCount()-1);
+                project.deleteItem(position);
+                ItemAdapter.notifyItemRemoved(position);
+                ItemAdapter.notifyItemChanged(getItemCount() == 0 ? 0 : getItemCount()-1);
+                // Update data source
+                projectsSP.replace(project.getName(), project);
             }
 
             @Override
@@ -487,7 +504,7 @@ public class ProjectFragment extends Fragment implements
         @NonNull
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            return new ItemVH(LayoutInflater.from(context).inflate(
+            return new ItemVH(LayoutInflater.from(mainActivity).inflate(
                     R.layout.list_item_textview_textview, parent, false));
 
         }

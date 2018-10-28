@@ -12,66 +12,60 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Provides a single access point to stored SharedPreferences data.
- *
- * Usage:
- * ProjectDataSource projectDataSource = new ProjectDataSource(context);
- * Project p = projectDataSource.get("R.string.sample_project");
- *
- */
-public class ProjectsDataSource implements DataSource<Project> {
+public class ProjectsDataSource implements DataSource<String, Project> {
 
     private SharedPreferences spInstance;
 
-    public ProjectsDataSource(Context context) {
+    public ProjectsDataSource(String sharedPreferencesFileName, Context context) {
         this.spInstance = context.getSharedPreferences(
-                context.getString(R.string.projects_key),
+                sharedPreferencesFileName,
                 0
         );
     }
 
+    @Override
+    public boolean isEmpty() {
+        Map<String, ?> map = spInstance.getAll();
+        return map.size() == 0;
+    }
+
+    @Override
+    public boolean contains(String key){
+        return spInstance.contains(key);
+    }
+
     /**
-     * Store a Project using it's name property as key.
-     * If the list exists it would overwrite it.
+     * Stores an Object using it's <em>name</em> property as key.
+     * If the key exists the Object would be overwritten by the Object provided.
+     *
+     * @param key     The key to use to store the Object.
+     * @param project The Object to store.
      */
     @Override
-    public void put(Project project) {
+    public void put(String key, Project project) {
         SharedPreferences.Editor editor = spInstance.edit();
         String json = new Gson().toJson(project);
         editor.putString(project.getName(), json);
         editor.commit();
     }
 
-    /**
-     * Get the Project by key.
-     */
     @Override
     public Project get(String key) {
         String json = spInstance.getString(key, null);
         return Deserializer.toProject(json);
     }
 
-    /**
-     * Get the Project by position.
-     */
     @Override
     public Project get(int position) {
         ArrayList<Project> projects = getAll();
         return projects.get(position);
     }
 
-    /**
-     * Get all the stored Project as an ArrayList.
-     */
     @Override
     public ArrayList<Project> getAll() {
         return new ArrayList<>(getAllAsMap().values());
     }
 
-    /**
-     * Get all the stored Project as a Map.
-     */
     @Override
     public Map<String, Project> getAllAsMap() {
         Map<String, Project> newMap = new HashMap<>();
@@ -83,10 +77,6 @@ public class ProjectsDataSource implements DataSource<Project> {
         return newMap;
     }
 
-    /**
-     * Get the keys of all the stored Project.
-     * This is also all the names of Projects.
-     */
     @Override
     public ArrayList<String> getAllKeys() {
         Map<String, ?> map = spInstance.getAll();
@@ -96,40 +86,15 @@ public class ProjectsDataSource implements DataSource<Project> {
         return null;
     }
 
+    @Override
+    public void replace(String key, Project project) {
+        put(key, project);
+    }
 
-    /**
-     * Remove a Project by key.
-     */
     @Override
     public void remove(String key) {
         SharedPreferences.Editor editor = spInstance.edit();
         editor.remove(key).commit();
-    }
-
-    /**
-     * Rename a stored Project.
-     */
-    @Override
-    public void renameKey(String oldName, String newName) {
-        Project project = get(oldName);
-        spInstance.edit().remove(oldName).commit();
-        project.setName(newName);
-        put(project);
-    }
-
-    @Override
-    public boolean contains(String key){
-        return spInstance.contains(key);
-    }
-
-
-    /**
-     * Check if Shared preferences is empty.
-     */
-    @Override
-    public boolean isEmpty() {
-        Map<String, ?> map = spInstance.getAll();
-        return map.size() == 0;
     }
 
     @Override
@@ -137,6 +102,17 @@ public class ProjectsDataSource implements DataSource<Project> {
         SharedPreferences.Editor editor = spInstance.edit();
         editor.clear();
         editor.commit();
+    }
+
+    @Override
+    public void registerOnChangeListener(SharedPreferences.OnSharedPreferenceChangeListener mListener) {
+        spInstance.registerOnSharedPreferenceChangeListener(mListener);
+    }
+
+    @Override
+    public void unRegisterOnChangeListener(
+            SharedPreferences.OnSharedPreferenceChangeListener mListener){
+        spInstance.unregisterOnSharedPreferenceChangeListener(mListener);
     }
 
 }

@@ -20,7 +20,7 @@ public class Panel extends BaseMaterial implements Quantifiable {
     @Override
     public double calcQuantity(double length, double width) {
         double area = length*width;
-        return super.setQuantity(area /(getLength() * getWidth())) * getCoefficient();
+        return super.setQuantity(area / (getLength() * getWidth()) * getCoefficient());
     }
 
 }

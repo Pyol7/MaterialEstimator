@@ -8,6 +8,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -18,6 +19,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.jeffreyromero.materialestimator.MainActivity;
 import com.jeffreyromero.materialestimator.utilities.CustomRecyclerView;
@@ -34,12 +36,13 @@ import java.util.ArrayList;
  */
 public class ProjectsFragment extends Fragment {
 
-    private static final String PROJECTS = "projects";
-    private ProjectsDataSource projectsdataSource;
+    private static final String TITLE = "Projects";
+    private static final String TAG = "ProjectsFragment";
+    private ProjectsDataSource projectsSP;
     private OnItemClickListener mListener;
     private ArrayList<Project> projects;
     private ProjectsAdapter adapter;
-    private Context context;
+    private MainActivity mainActivity;
 
     public ProjectsFragment() {
         // Required empty public constructor
@@ -56,7 +59,6 @@ public class ProjectsFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        this.context = context;
         if (context instanceof OnItemClickListener) {
             mListener = (OnItemClickListener) context;
         } else {
@@ -68,10 +70,17 @@ public class ProjectsFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Init ProjectsDataSource
-        projectsdataSource = new ProjectsDataSource(context);
+
+        // Use MainActivity as mainActivity
+        mainActivity = (MainActivity)getActivity();
+
+        // Init project item shared preferences
+        projectsSP = new ProjectsDataSource(
+                getString(R.string.projects_key),
+                mainActivity
+        );
         // Get array list of projects from SP
-        projects = projectsdataSource.getAll();
+        projects = projectsSP.getAll();
         // Init list adapter
         adapter = new ProjectsAdapter();
     }
@@ -79,21 +88,39 @@ public class ProjectsFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        //Show options menu.
-        setHasOptionsMenu(true);
+
         //Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.projects_fragment, container, false);
-        //Set title
-        getActivity().setTitle(R.string.nav_projects);
-        //Get the recyclerView from the parent fragment view.
+
+        // Get this fragment's toolbar and set it as the action bar in MainActivity.
+        Toolbar toolbar = view.findViewById(R.id.toolbar);
+        mainActivity.setSupportActionBar(toolbar);
+
+        // Hide default title which shows the app name.
+        mainActivity.getSupportActionBar().setDisplayShowTitleEnabled(false);
+
+        // Show custom title
+        toolbar.setTitle(TITLE);
+
+        // Make this fragment's options visible on the main menu
+        setHasOptionsMenu(true);
+
+        // Enable drawer navigation for this fragment
+        mainActivity.enableDrawerNavigation(true);
+
+        // Set up the recyclerView
         CustomRecyclerView rv = view.findViewById(R.id.customRecyclerView);
         rv.setEmptyView(view.findViewById(R.id.emptyView));
         rv.setAdapter(adapter);
 
-        // Enable drawer navigation for this fragment
-        ((MainActivity)getActivity()).enableDrawerNavigation();
-
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Reload to get changes
+        projects = projectsSP.getAll();
     }
 
     @Override
@@ -104,7 +131,7 @@ public class ProjectsFragment extends Fragment {
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        //Create the add menu item
+        // Add this fragment's option to the main menu
         MenuItem item = menu.add(Menu.NONE, R.id.action_add, 10, R.string.action_add);
         item.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
         item.setIcon(R.drawable.ic_add_white_24dp);
@@ -112,12 +139,18 @@ public class ProjectsFragment extends Fragment {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.action_add) {
-            addProject();
-            return true;
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                // Provide functionality for the home icon.
+                // Used when enableDrawerNavigation = true
+                mainActivity.toggleDrawer();
+                return true;
+            case R.id.action_add:
+                addProject();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
-        return super.onOptionsItemSelected(item);
     }
 
     public void addProject() {
@@ -138,9 +171,9 @@ public class ProjectsFragment extends Fragment {
                 // Create new project
                 Project project = new Project(name);
                 // Add new project to SP
-                projectsdataSource.put(project);
+                projectsSP.put(project.getName(), project);
                 // Get updated list of projects
-                projects = projectsdataSource.getAll();
+                projects = projectsSP.getAll();
                 adapter.notifyDataSetChanged();
                 //Pass the new project to MainActivity
                 mListener.onProjectsFragmentItemClick(project);
@@ -159,6 +192,10 @@ public class ProjectsFragment extends Fragment {
                 WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         // Show dialog
         alertDialog.show();
+    }
+
+    public static String getTAG() {
+        return TAG;
     }
 
     //------------------------------- Adapter -------------------------------//
@@ -237,15 +274,15 @@ public class ProjectsFragment extends Fragment {
             // PrimaryActionModeCallBack interface callback methods
             @Override
             public void deleteItem(final int position) {
-                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(mainActivity);
                 alertDialogBuilder
                         .setTitle("Delete project?")
                         .setPositiveButton("Delete",new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog,int id) {
 
                                 // Remove the selected project
-                                projectsdataSource.remove(projects.get(position).getName());
-                                projects = projectsdataSource.getAll();
+                                projectsSP.remove(projects.get(position).getName());
+                                projects = projectsSP.getAll();
                                 adapter.notifyDataSetChanged();
 
                             }

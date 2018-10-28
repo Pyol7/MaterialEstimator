@@ -6,9 +6,9 @@
             android:icon="@drawable/ic_location_city_white_24dp"
             android:title="@string/nav_projects" />
         <item
-            android:id="@+id/nav_material_lists"
+            android:id="@+id/nav_item_types"
             android:icon="@drawable/ic_format_list_bulleted_white_24dp"
-            android:title="@string/nav_material_lists" />
+            android:title="@string/nav_item_types" />
         <item
             android:id="@+id/nav_trash"
             android:icon="@drawable/ic_delete_white_24dp"

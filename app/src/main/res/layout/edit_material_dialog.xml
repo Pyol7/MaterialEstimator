@@ -7,6 +7,51 @@
     android:focusable="true"
     android:focusableInTouchMode="true">
 
+    <EditText
+        android:id="@+id/coverageET"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:autofillHints=""
+        android:background="@android:color/transparent"
+        android:inputType="numberDecimal"
+        android:selectAllOnFocus="false"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/guideline"
+        app:layout_constraintTop_toBottomOf="@+id/widthET"
+        tools:text="250" />
+
+    <TextView
+        android:id="@+id/coverageLabelTV"
+        android:layout_width="88dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="8dp"
+        android:text="Coverage:"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="@+id/coverageET"
+        app:layout_constraintEnd_toStartOf="@+id/guideline"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <EditText
+        android:id="@+id/nameET"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="24dp"
+        android:autofillHints=""
+        android:background="@android:color/transparent"
+        android:inputType="textPersonName"
+        android:selectAllOnFocus="false"
+        android:singleLine="true"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/guideline"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Panel" />
+
     <TextView
         android:id="@+id/nameLabelTV"
         android:layout_width="0dp"
@@ -15,49 +60,9 @@
         android:layout_marginEnd="8dp"
         android:text="Name:"
         android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="@+id/nameTV"
+        app:layout_constraintBottom_toBottomOf="@+id/nameET"
         app:layout_constraintEnd_toStartOf="@+id/guideline"
         app:layout_constraintStart_toStartOf="parent" />
-
-    <TextView
-        android:id="@+id/nameTV"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:layout_marginEnd="24dp"
-        android:focusable="auto"
-        android:focusableInTouchMode="false"
-        android:textSize="16sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/guideline"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="Main Tee" />
-
-    <TextView
-        android:id="@+id/quantityLabelTV"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:text="Quantity:"
-        android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="@+id/quantityET"
-        app:layout_constraintEnd_toStartOf="@+id/guideline"
-        app:layout_constraintStart_toStartOf="@+id/nameLabelTV" />
-
-    <EditText
-        android:id="@+id/quantityET"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:autofillHints=""
-        android:background="@android:color/transparent"
-        android:inputType="numberDecimal"
-        android:selectAllOnFocus="true"
-        android:textSize="16sp"
-        app:layout_constraintEnd_toEndOf="@+id/nameTV"
-        app:layout_constraintStart_toEndOf="@+id/guideline"
-        app:layout_constraintTop_toBottomOf="@+id/nameTV"
-        tools:text="125" />
 
     <TextView
         android:id="@+id/unitPriceLabelTV"
@@ -68,7 +73,7 @@
         android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="@+id/unitPriceET"
         app:layout_constraintEnd_toStartOf="@+id/guideline"
-        app:layout_constraintStart_toStartOf="@+id/quantityLabelTV" />
+        app:layout_constraintStart_toStartOf="@+id/nameLabelTV" />
 
     <EditText
         android:id="@+id/unitPriceET"
@@ -78,11 +83,11 @@
         android:autofillHints=""
         android:background="@android:color/transparent"
         android:inputType="numberDecimal"
-        android:selectAllOnFocus="true"
+        android:selectAllOnFocus="false"
         android:textSize="16sp"
-        app:layout_constraintEnd_toEndOf="@+id/quantityET"
+        app:layout_constraintEnd_toEndOf="@+id/nameET"
         app:layout_constraintStart_toEndOf="@+id/guideline"
-        app:layout_constraintTop_toBottomOf="@+id/quantityET"
+        app:layout_constraintTop_toBottomOf="@+id/nameET"
         tools:text="12.25" />
 
     <View
@@ -94,8 +99,9 @@
         android:layout_marginEnd="24dp"
         android:background="?android:attr/listDivider"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/unitPriceET" />
+        app:layout_constraintTop_toBottomOf="@+id/coverageET" />
 
     <TextView
         android:id="@+id/spacingLabelTV"
@@ -118,12 +124,12 @@
         android:autofillHints=""
         android:background="@android:color/transparent"
         android:inputType="numberDecimal"
-        android:selectAllOnFocus="true"
+        android:selectAllOnFocus="false"
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@+id/guideline"
-        app:layout_constraintTop_toBottomOf="@+id/constraintLayout"
+        app:layout_constraintTop_toBottomOf="@+id/unitPriceET"
         tools:text="16" />
 
     <TextView
@@ -147,12 +153,12 @@
         android:autofillHints=""
         android:background="@android:color/transparent"
         android:inputType="numberDecimal"
-        android:selectAllOnFocus="true"
+        android:selectAllOnFocus="false"
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@+id/guideline"
         app:layout_constraintTop_toBottomOf="@+id/lengthET"
-        tools:text="4" />
+        tools:text="48" />
 
     <TextView
         android:id="@+id/lengthLabelTV"
@@ -175,12 +181,12 @@
         android:autofillHints=""
         android:background="@android:color/transparent"
         android:inputType="numberDecimal"
-        android:selectAllOnFocus="true"
+        android:selectAllOnFocus="false"
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@+id/guideline"
         app:layout_constraintTop_toBottomOf="@+id/spacingET"
-        tools:text="12" />
+        tools:text="120" />
 
     <android.support.constraint.ConstraintLayout
         android:id="@+id/constraintLayout"
@@ -189,6 +195,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="8dp"
+        android:paddingBottom="24dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
@@ -198,8 +205,8 @@
             android:id="@+id/coefficientLabelTV"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:text="Increase output"
+            android:layout_marginStart="12dp"
+            android:text="Increase quantity by:"
             android:textSize="16sp"
             app:layout_constraintStart_toStartOf="@+id/coefficientSB"
             app:layout_constraintTop_toTopOf="parent" />
@@ -208,6 +215,7 @@
             android:id="@+id/coefficientSB"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
             android:layout_marginTop="16dp"
             android:max="50"
             android:progress="0"
@@ -246,6 +254,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintGuide_begin="131dp" />
+        app:layout_constraintGuide_begin="115dp" />
 
 </android.support.constraint.ConstraintLayout>

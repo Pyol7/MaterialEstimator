@@ -3,12 +3,12 @@ package com.jeffreyromero.materialestimator.data;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import com.jeffreyromero.materialestimator.models.BaseItem;
 import com.jeffreyromero.materialestimator.models.BaseMaterial;
 import com.jeffreyromero.materialestimator.models.Project;
-import com.jeffreyromero.materialestimator.models.ProjectItem;
-import com.jeffreyromero.materialestimator.models.defaultProjectItems.DroppedCeiling;
-import com.jeffreyromero.materialestimator.models.defaultProjectItems.DrywallCeiling;
-import com.jeffreyromero.materialestimator.models.defaultProjectItems.DrywallPartition;
+import com.jeffreyromero.materialestimator.models.Items.DroppedCeiling;
+import com.jeffreyromero.materialestimator.models.Items.DrywallCeiling;
+import com.jeffreyromero.materialestimator.models.Items.DrywallPartition;
 import com.jeffreyromero.materialestimator.models.quantifiables.CeilingTile;
 import com.jeffreyromero.materialestimator.models.quantifiables.Tee;
 import com.jeffreyromero.materialestimator.models.non_quantifiables.MainSupportFastener;
@@ -68,16 +68,16 @@ public class Deserializer {
                 .registerSubtype(CeilingTile.class)
                 .registerSubtype(Tee.class);
 
-        // ProjectItem
-        GsonRuntimeTypeAdapterFactory<ProjectItem> ProjectItemTypeAdapter = GsonRuntimeTypeAdapterFactory
-                .of(ProjectItem.class, "subType")
+        // BaseItem
+        GsonRuntimeTypeAdapterFactory<BaseItem> itemTypeAdapter = GsonRuntimeTypeAdapterFactory
+                .of(BaseItem.class, "subType")
                 .registerSubtype(DroppedCeiling.class, "Dropped Ceiling")
                 .registerSubtype(DrywallCeiling.class, "Drywall Ceiling")
                 .registerSubtype(DrywallPartition.class, "Drywall Partition");
 
         gson = new GsonBuilder()
                 .registerTypeAdapterFactory(BaseMaterialTypeAdapter)
-                .registerTypeAdapterFactory(ProjectItemTypeAdapter)
+                .registerTypeAdapterFactory(itemTypeAdapter)
                 .create();
     }
 
@@ -103,12 +103,12 @@ public class Deserializer {
         return gson.fromJson(json, Project.class);
     }
 
-    public static ProjectItem toProjectItem(String json) {
-        return gson.fromJson(json, ProjectItem.class);
+    public static BaseItem toItem(String json) {
+        return gson.fromJson(json, BaseItem.class);
     }
 
-    public static ArrayList<ProjectItem> toProjectItems(String json) {
-        Type type = new TypeToken<ArrayList<ProjectItem>>(){}.getType();
+    public static ArrayList<BaseItem> toListOfItems(String json) {
+        Type type = new TypeToken<ArrayList<BaseItem>>(){}.getType();
         return gson.fromJson(json, type);
     }
 

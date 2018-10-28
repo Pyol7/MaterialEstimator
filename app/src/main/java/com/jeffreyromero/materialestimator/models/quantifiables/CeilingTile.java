@@ -19,7 +19,6 @@ public class CeilingTile extends BaseMaterial implements Quantifiable {
 
     @Override
     public double calcQuantity(double length, double width) {
-        double q = (length * width)/(getLength() * getWidth());
-        return super.setQuantity(q);
+        return super.setQuantity((length * width)/(getLength() * getWidth()) * getCoefficient());
     }
 }

@@ -7,8 +7,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class Project {
-    private ArrayList<ProjectItem> projectItems;
-    private ArrayList<BaseMaterial> materialListFromProjectItems;
+    private ArrayList<BaseItem> items;
+    private ArrayList<BaseMaterial> materialListFromItems;
     private double totalPrice;
     private String dateCreated;
     private String location;
@@ -16,35 +16,28 @@ public class Project {
     private String name;
 
     public Project(String name) {
-        this.projectItems = new ArrayList<>();
+        this.items = new ArrayList<>();
         this.dateCreated = setDateCreated();
         this.name = name;
     }
 
-    public Project(String name, ArrayList<ProjectItem> projectItems) {
-        this.dateCreated = setDateCreated();
-        this.projectItems = projectItems;
-        builtMaterialListFromProjectItems();
-        this.name = name;
+    public ArrayList<BaseItem> getItems() {
+        return items;
     }
 
-    public ArrayList<ProjectItem> getProjectItems() {
-        return projectItems;
+    public void setItems(ArrayList<BaseItem> items) {
+        this.items = items;
+        builtMaterialListFromItems();
     }
 
-    public void setProjectItems(ArrayList<ProjectItem> projectItems) {
-        this.projectItems = projectItems;
-        builtMaterialListFromProjectItems();
+    public void addItem(BaseItem item){
+        items.add(item);
+        builtMaterialListFromItems();
     }
 
-    public void addProjectItem(ProjectItem projectItem){
-        projectItems.add(projectItem);
-        builtMaterialListFromProjectItems();
-    }
-
-    public void deleteProjectItem(int position){
-        projectItems.remove(position);
-        builtMaterialListFromProjectItems();
+    public void deleteItem(int position){
+        items.remove(position);
+        builtMaterialListFromItems();
     }
 
     public String getName() {
@@ -63,18 +56,10 @@ public class Project {
         return DateFormat.format("dd-MM-yyyy", new java.util.Date()).toString();
     }
 
-    public void setDateCreated(String date) {
-        this.dateCreated = date;
-    }
-
-    public double getTotalPrice() {
-        return totalPrice;
-    }
-
     public double calcTotalPrice() {
         //Sum price from every project item in the list.
         double total = 0;
-        for (ProjectItem pi : projectItems ) {
+        for (BaseItem pi : items) {
             total += pi.getTotalPrice();
         }
         this.totalPrice = total;
@@ -98,14 +83,14 @@ public class Project {
     }
 
     public ArrayList<BaseMaterial> getMaterialList() {
-        return materialListFromProjectItems;
+        return materialListFromItems;
     }
 
-    private void builtMaterialListFromProjectItems() {
+    private void builtMaterialListFromItems() {
 
-        //Create a flat list containing all materials from each ProjectItem.
+        //Create a flat list containing all materials from each BaseItem.
         ArrayList<BaseMaterial> flatList = new ArrayList<>();
-        for (ProjectItem pi : this.getProjectItems()) {
+        for (BaseItem pi : this.getItems()) {
             MaterialList mList = pi.getMaterialList();
             for (int i = 0; i < mList.size(); i++) {
                 flatList.add(mList.get(i));
@@ -127,7 +112,7 @@ public class Project {
             }
         }
 
-        this.materialListFromProjectItems = new ArrayList<>(map.values());
+        this.materialListFromItems = new ArrayList<>(map.values());
     }
 
     @Override

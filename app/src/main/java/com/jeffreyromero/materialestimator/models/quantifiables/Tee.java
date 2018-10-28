@@ -32,21 +32,20 @@ public class Tee extends BaseMaterial implements Quantifiable {
 
     @Override
     public double calcQuantity(double length, double width) {
+        double q;
         // Determine type of tee
         if (getLength() >= MAIN_TEE_MIN_LENGTH && getLength() <= MAIN_TEE_MAX_LENGTH){
             // Calculate quantity for main tee
-            double q = (length / SECONDARY_TEE_LENGTH) * (width / getLength());
-            return super.setQuantity(q);
+            q = (length / SECONDARY_TEE_LENGTH) * (width / getLength());
         } else if (getLength() == SECONDARY_TEE_LENGTH){
             // Calculate quantity for Secondary Tee
-            double q = (length / getLength()) * (width / TERTIARY_TEE_LENGTH);
-            return  super.setQuantity(q);
+            q = (length / getLength()) * (width / TERTIARY_TEE_LENGTH);
         } else if (getLength() == TERTIARY_TEE_LENGTH){
             // Calculate quantity for Tertiary Tee
-            double q = (width / getLength()) * (length / SECONDARY_TEE_LENGTH);
-            return super.setQuantity(q);
+            q = (width / getLength()) * (length / SECONDARY_TEE_LENGTH);
         } else {
             throw new IllegalArgumentException("Unrecognized Tee length");
         }
+        return super.setQuantity(q * getCoefficient());
     }
 }

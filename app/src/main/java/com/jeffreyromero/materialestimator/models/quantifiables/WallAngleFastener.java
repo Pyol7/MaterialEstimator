@@ -20,6 +20,6 @@ public class WallAngleFastener extends BaseMaterial implements Quantifiable {
     @Override
     public double calcQuantity(double length, double width) {
         double par = (length * 2) + (width * 2);
-        return super.setQuantity(par / getSpacing());
+        return super.setQuantity(par / getSpacing() * getCoefficient());
     }
 }

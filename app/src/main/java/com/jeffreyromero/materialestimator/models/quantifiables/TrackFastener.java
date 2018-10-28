@@ -19,6 +19,6 @@ public class TrackFastener extends BaseMaterial implements Quantifiable {
 
     @Override
     public double calcQuantity(double length, double height) {
-        return super.setQuantity(length / getSpacing());
+        return super.setQuantity(length / getSpacing() * getCoefficient());
     }
 }

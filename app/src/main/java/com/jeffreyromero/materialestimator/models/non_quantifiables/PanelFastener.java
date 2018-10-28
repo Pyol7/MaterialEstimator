@@ -14,6 +14,6 @@ public class PanelFastener extends BaseMaterial{
         double pQ = ((Panel)panel).calcQuantity(dim1,dim2);
         double wQ = (panel.getWidth() / getSpacing()) + 1;
         double lQ = (panel.getLength() / secondarySupport.getSpacing()) + 1;
-        return super.setQuantity(pQ * wQ * lQ);
+        return super.setQuantity(pQ * wQ * lQ * getCoefficient());
     }
 }

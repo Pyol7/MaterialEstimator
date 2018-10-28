@@ -16,11 +16,6 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name=".material.MaterialActivity"
-            android:label="@string/app_name">
-        </activity>
-        
         <provider
             android:authorities="com.jeffreyromero.materialestimator.fileprovider"
             android:name="android.support.v4.content.FileProvider"

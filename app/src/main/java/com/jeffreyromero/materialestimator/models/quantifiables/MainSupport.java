@@ -30,7 +30,7 @@ public class MainSupport extends BaseMaterial implements Quantifiable {
         } else {
             lengths = length / getLength();
         }
-        return super.setQuantity(pieces * lengths);
+        return super.setQuantity(pieces * lengths * getCoefficient());
     }
 
     public int getLapLength() {

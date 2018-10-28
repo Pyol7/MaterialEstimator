@@ -13,6 +13,6 @@ public class MainSupportFastener extends BaseMaterial {
     public double calcFastenerQuantity(double dim1, double dim2, BaseMaterial mainSupport, BaseMaterial secondarySupport) {
         double cQ = ((MainSupport)mainSupport).calcQuantity(dim1,dim2);
         double q = ((cQ * mainSupport.getLength() / secondarySupport.getSpacing()) + 1) * 2;
-        return super.setQuantity(q);
+        return super.setQuantity(q * getCoefficient());
     }
 }

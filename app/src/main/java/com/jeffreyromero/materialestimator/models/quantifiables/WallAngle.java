@@ -20,6 +20,6 @@ public class WallAngle extends BaseMaterial implements Quantifiable {
     @Override
     public double calcQuantity(double length, double width) {
         double par = (length * 2) + (width * 2);
-        return super.setQuantity(par / getLength()) * getCoefficient();
+        return super.setQuantity(par / getLength() * getCoefficient());
     }
 }

@@ -30,7 +30,7 @@ public class FurringChannel extends BaseMaterial implements Quantifiable {
         } else {
             lengths = width / getLength();
         }
-        return super.setQuantity(pieces * lengths);
+        return super.setQuantity(pieces * lengths * getCoefficient());
     }
 
     public int getLapLength() {

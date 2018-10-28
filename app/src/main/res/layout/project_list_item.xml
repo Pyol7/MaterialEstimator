@@ -7,7 +7,7 @@
     android:background="@drawable/white_to_light_blue">
 
     <TextView
-        android:id="@+id/nameTV"
+        android:id="@+id/toolbarTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -15,7 +15,7 @@
         android:textColor="@color/colorPrimary"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="Project item name" />
+        tools:text="Project baseItem name" />
 
     <TextView
         android:id="@+id/dimAreaTV"
@@ -24,8 +24,8 @@
         android:layout_marginBottom="8dp"
         android:layout_marginTop="4dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/nameTV"
-        app:layout_constraintTop_toBottomOf="@+id/nameTV"
+        app:layout_constraintStart_toStartOf="@+id/toolbarTitle"
+        app:layout_constraintTop_toBottomOf="@+id/toolbarTitle"
         tools:text="12ft x 10ft (120ft2)" />
 
     <TextView
