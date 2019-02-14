@@ -13,7 +13,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.EditText;
-import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.jeffreyromero.materialestimator.R;
@@ -61,12 +60,12 @@ public class EditQuantityDialog extends DialogFragment {
         } catch (ClassCastException e) {
             throw new ClassCastException(
                     "The hosting Fragment must implement " +
-                            "SingleTextInputDialog.OnDialogSubmitListener");
+                            "EditQuantityDialog.OnDialogSubmitListener");
         }
 
         // Get arguments from the bundle
         position = getArguments().getInt(POSITION);
-        material = Deserializer.toItem(getArguments().getString(ITEM))
+        material = Deserializer.toItemType(getArguments().getString(ITEM))
                 .getMaterialList()
                 .get(position);
     }
@@ -86,7 +85,7 @@ public class EditQuantityDialog extends DialogFragment {
         // Build dialog
         final AlertDialog.Builder dialog = new AlertDialog.Builder(getActivity());
         dialog.setView(dialogView);
-        dialog.setTitle("Edit Quantity");
+        dialog.setTitle(material.getName());
         dialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {

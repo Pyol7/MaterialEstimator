@@ -1,4 +1,4 @@
-package com.jeffreyromero.materialestimator.project;
+package com.jeffreyromero.materialestimator.projectFragments;
 
 import android.content.Context;
 import android.content.DialogInterface;
@@ -19,12 +19,12 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.google.gson.Gson;
 import com.jeffreyromero.materialestimator.MainActivity;
+import com.jeffreyromero.materialestimator.data.Deserializer;
 import com.jeffreyromero.materialestimator.utilities.CustomRecyclerView;
 import com.jeffreyromero.materialestimator.R;
-import com.jeffreyromero.materialestimator.data.ProjectsDataSource;
 import com.jeffreyromero.materialestimator.models.Project;
 import com.jeffreyromero.materialestimator.utilities.PrimaryActionModeCallBack;
 
@@ -36,29 +36,36 @@ import java.util.ArrayList;
  */
 public class ProjectsFragment extends Fragment {
 
-    private static final String TITLE = "Projects";
-    private static final String TAG = "ProjectsFragment";
-    private ProjectsDataSource projectsSP;
+    private static final String PROJECTS = "ProjectsFragment";
     private OnItemClickListener mListener;
+    private ProjectsAdapter projectsAdapter;
     private ArrayList<Project> projects;
-    private ProjectsAdapter adapter;
     private MainActivity mainActivity;
 
     public ProjectsFragment() {
         // Required empty public constructor
     }
 
-    public static ProjectsFragment newInstance() {
-        return new ProjectsFragment();
+    public static ProjectsFragment newInstance(ArrayList<Project> projects) {
+        ProjectsFragment f = new ProjectsFragment();
+        Bundle args = new Bundle();
+        String json = new Gson().toJson(projects);
+        args.putString(PROJECTS, json);
+        f.setArguments(args);
+        return f;
     }
 
     public interface OnItemClickListener {
-        void onProjectsFragmentItemClick(Project project);
+        void onProjectsFragmentLoadProjectRequest(Project project);
+        ArrayList<Project> onProjectsFragmentAddProjectRequest(Project project);
+        ArrayList<Project> onProjectsFragmentDeleteProjectRequest(String key);
     }
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+        // Ensure that there is a listener and it implements the callback(s).
+        // In this case MainActivity is the listener so we can cast from context.
         if (context instanceof OnItemClickListener) {
             mListener = (OnItemClickListener) context;
         } else {
@@ -70,57 +77,60 @@ public class ProjectsFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // Use MainActivity as mainActivity
+        // Use MainActivity as context
         mainActivity = (MainActivity)getActivity();
-
-        // Init project item shared preferences
-        projectsSP = new ProjectsDataSource(
-                getString(R.string.projects_key),
-                mainActivity
-        );
-        // Get array list of projects from SP
-        projects = projectsSP.getAll();
-        // Init list adapter
-        adapter = new ProjectsAdapter();
+        // Init projectsAdapter
+        projectsAdapter = new ProjectsAdapter();
+        // Get the passed in projects.
+        if (savedInstanceState == null){
+            // Use the passed in project.
+            if (getArguments() != null) {
+                String json = getArguments().getString(PROJECTS);
+                projects = Deserializer.toProjects(json);
+            }
+        } else {
+            // Get projects from the savedInstanceState bundle
+            projects = Deserializer.toProjects(savedInstanceState.getString(PROJECTS));
+        }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
         //Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.projects_fragment, container, false);
-
         // Get this fragment's toolbar and set it as the action bar in MainActivity.
         Toolbar toolbar = view.findViewById(R.id.toolbar);
         mainActivity.setSupportActionBar(toolbar);
-
         // Hide default title which shows the app name.
         mainActivity.getSupportActionBar().setDisplayShowTitleEnabled(false);
-
         // Show custom title
-        toolbar.setTitle(TITLE);
-
+        toolbar.setTitle(PROJECTS);
         // Make this fragment's options visible on the main menu
         setHasOptionsMenu(true);
-
-        // Enable drawer navigation for this fragment
+        // Drawer navigation:
+        // true - enables drawer navigation.
+        // false - enables back navigation.
+        // no call - hides all icons.
         mainActivity.enableDrawerNavigation(true);
-
         // Set up the recyclerView
-        CustomRecyclerView rv = view.findViewById(R.id.customRecyclerView);
-        rv.setEmptyView(view.findViewById(R.id.emptyView));
-        rv.setAdapter(adapter);
-
+        CustomRecyclerView rv = view.findViewById(R.id.item_list_view_rv);
+        rv.setEmptyView(view.findViewById(R.id.empty_view_ll));
+        rv.setAdapter(projectsAdapter);
         return view;
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(PROJECTS, new Gson().toJson(projects));
     }
 
     @Override
     public void onResume() {
         super.onResume();
         // Reload to get changes
-        projects = projectsSP.getAll();
+//        projects = projectsSP.getAll();
     }
 
     @Override
@@ -131,10 +141,10 @@ public class ProjectsFragment extends Fragment {
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        // Add this fragment's option to the main menu
+        // Add the add action item to the option menu.
         MenuItem item = menu.add(Menu.NONE, R.id.action_add, 10, R.string.action_add);
         item.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
-        item.setIcon(R.drawable.ic_add_white_24dp);
+        item.setIcon(R.drawable.ic_add);
     }
 
     @Override
@@ -164,20 +174,15 @@ public class ProjectsFragment extends Fragment {
         dialogBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-
                 // Get user input
-                EditText nameET = dialogView.findViewById(R.id.nameET);
-                String name = nameET.getText().toString();
+                EditText projectNameET = dialogView.findViewById(R.id.projectNameET);
+                String projectName = projectNameET.getText().toString();
                 // Create new project
-                Project project = new Project(name);
-                // Add new project to SP
-                projectsSP.put(project.getName(), project);
-                // Get updated list of projects
-                projects = projectsSP.getAll();
-                adapter.notifyDataSetChanged();
-                //Pass the new project to MainActivity
-                mListener.onProjectsFragmentItemClick(project);
-
+                Project project = new Project(projectName);
+                // Add new project to data source and update projects variable.
+                projects = mListener.onProjectsFragmentAddProjectRequest(project);
+                // Refresh list
+                projectsAdapter.notifyDataSetChanged();
             }
         });
         dialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -194,11 +199,7 @@ public class ProjectsFragment extends Fragment {
         alertDialog.show();
     }
 
-    public static String getTAG() {
-        return TAG;
-    }
-
-    //------------------------------- Adapter -------------------------------//
+    //------------------------------- ItemTypesListAdapter -------------------------------//
 
     public class ProjectsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -228,7 +229,7 @@ public class ProjectsFragment extends Fragment {
             Project project = projects.get(position);
             ItemViewHolder viewHolder = (ItemViewHolder) holder;
             viewHolder.columnLeftTV.setText(project.getName());
-            viewHolder.columnRightTV.setText(String.valueOf(project.getDateCreated()));
+            viewHolder.columnRightTV.setText(project.getDateCreated());
         }
 
         private class ItemViewHolder extends RecyclerView.ViewHolder implements
@@ -245,10 +246,8 @@ public class ProjectsFragment extends Fragment {
                 itemView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-
                         //Pass the clicked project to MainActivity.
-                        mListener.onProjectsFragmentItemClick(projects.get(getAdapterPosition()));
-
+                        mListener.onProjectsFragmentLoadProjectRequest(projects.get(getAdapterPosition()));
                     }
                 });
 
@@ -279,12 +278,9 @@ public class ProjectsFragment extends Fragment {
                         .setTitle("Delete project?")
                         .setPositiveButton("Delete",new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog,int id) {
-
                                 // Remove the selected project
-                                projectsSP.remove(projects.get(position).getName());
-                                projects = projectsSP.getAll();
-                                adapter.notifyDataSetChanged();
-
+                                projects = mListener.onProjectsFragmentDeleteProjectRequest(projects.get(position).getName());
+                                projectsAdapter.notifyDataSetChanged();
                             }
                         })
                         .setNegativeButton("Cancel",new DialogInterface.OnClickListener() {

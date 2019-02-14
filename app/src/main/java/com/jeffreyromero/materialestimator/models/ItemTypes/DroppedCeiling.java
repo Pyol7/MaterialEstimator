@@ -1,4 +1,4 @@
-package com.jeffreyromero.materialestimator.models.Items;
+package com.jeffreyromero.materialestimator.models.ItemTypes;
 
 import com.jeffreyromero.materialestimator.models.BaseItem;
 import com.jeffreyromero.materialestimator.models.BaseMaterial;
@@ -15,9 +15,6 @@ import java.util.List;
 
 public class DroppedCeiling extends BaseItem {
 
-    private static final String LENGTH = "Length";
-    private static final String WIDTH = "Width";
-
     public DroppedCeiling(String name) {
         super("Dropped Ceiling", name);
         setMaterialList(initMaterialList());
@@ -33,17 +30,14 @@ public class DroppedCeiling extends BaseItem {
         list.add(new WallAngle("Dropped Ceiling Wall Angles", 15.25, 120));
         list.add(new WallAngleFastener("Nails 3/4", 0.16, 12));
         list.add(new Hanger("Hanger 14g", 8.50, 48));
-        return new MaterialList(list, generateNameFromClassName());
+        return new MaterialList(list, buildMaterialListNameFromClassName());
     }
 
     @Override
-    public void calcQuantities(double x, double y) {
+    public void calcQuantities() {
         // Analyse dimensions
-        double length = Math.max(x, y);
-        double width = Math.min(x, y);
-        // Set to super class
-        setLength(length);
-        setWidth(width);
+        double length = Math.max(getLength(), getWidth());
+        double width = Math.min(getLength(), getWidth());
         // Calculate material
         List<BaseMaterial> tempList = new ArrayList<>();
         MaterialList ml = getMaterialList();
@@ -54,15 +48,4 @@ public class DroppedCeiling extends BaseItem {
         // Update materialList
         ml.setList(tempList);
     }
-
-    @Override
-    public String getXHintText() {
-        return LENGTH;
-    }
-
-    @Override
-    public String getYHintText() {
-        return WIDTH;
-    }
-
 }

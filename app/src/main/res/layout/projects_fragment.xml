@@ -13,7 +13,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <com.jeffreyromero.materialestimator.utilities.CustomRecyclerView
-        android:id="@+id/customRecyclerView"
+        android:id="@+id/item_list_view_rv"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="8dp"
@@ -27,7 +27,7 @@
         app:layout_constraintTop_toBottomOf="@+id/toolbar" />
 
     <LinearLayout
-        android:id="@+id/emptyView"
+        android:id="@+id/empty_view_ll"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"

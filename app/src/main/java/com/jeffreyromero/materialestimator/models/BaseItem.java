@@ -10,12 +10,13 @@ public abstract class BaseItem implements Item {
     protected double width;
     protected double height;
     protected String name;
-    protected String createdBy = "Default";
 
     protected BaseItem(String subType, String name) {
         this.subType = subType;
         this.name = name;
     }
+
+    public abstract MaterialList initMaterialList();
 
     public String getSubType() {
         return subType;
@@ -75,23 +76,15 @@ public abstract class BaseItem implements Item {
         return total;
     }
 
-    public String getCreatedBy() {
-        return createdBy;
-    }
-
-    public void setCreatedBy(String createdBy) {
-        this.createdBy = createdBy;
-    }
-
     @Override
     public String toString() {
         return name;
     }
 
-    protected String generateNameFromClassName(){
-        return StringUtils.join(
+    protected String buildMaterialListNameFromClassName(){
+        String className = StringUtils.join(
                 StringUtils.splitByCharacterTypeCamelCase( getClass().getSimpleName()),
-                ' '
-        );
+                ' ');
+        return className + " Material List";
     }
 }

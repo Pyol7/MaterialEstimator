@@ -43,12 +43,13 @@ public class SingleTextInputDialog extends DialogFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //Get the hosting fragment to implement this callback interface.
+        // Ensure that there is a listener and it implements the callback(s).
+        // In this case the target fragment must be the listener else an exception is thrown.
         try {
             mListener = (OnDialogSubmitListener) getTargetFragment();
         } catch (ClassCastException e) {
             throw new ClassCastException(
-                    "The hosting Fragment must implement " +
+                    "The target Fragment must implement " +
                             "SingleTextInputDialog.OnDialogSubmitListener");
         }
     }

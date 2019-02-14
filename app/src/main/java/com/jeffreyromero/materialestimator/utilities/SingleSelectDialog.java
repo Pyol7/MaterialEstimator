@@ -118,7 +118,7 @@ public class SingleSelectDialog extends DialogFragment {
         mListener = null;
     }
 
-    //------------------------------- Adapter -------------------------------//
+    //------------------------------- ItemTypesListAdapter -------------------------------//
 
     public class Adapter extends RecyclerView.Adapter {
 

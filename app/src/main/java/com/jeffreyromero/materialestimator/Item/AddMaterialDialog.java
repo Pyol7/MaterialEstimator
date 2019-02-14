@@ -15,7 +15,7 @@
 //import android.widget.TextView;
 //
 //import com.jeffreyromero.materialestimator.R;
-//import com.jeffreyromero.materialestimator.data.ItemsDataSource;
+//import com.jeffreyromero.materialestimator.data.ItemTypesSharedPreference;
 //import com.jeffreyromero.materialestimator.models.BaseMaterial;
 //import com.jeffreyromero.materialestimator.models.MaterialList;
 //
@@ -97,7 +97,7 @@
 //
 //    private void initSpinner() {
 //        //Get the default material list from App Shared Preferences.
-//        ItemsDataSource appSPHelper = new ItemsDataSource(
+//        ItemTypesSharedPreference appSPHelper = new ItemTypesSharedPreference(
 //                getString(R.string.default_material_lists),
 //                context
 //        );

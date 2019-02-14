@@ -12,7 +12,6 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -21,25 +20,25 @@ import android.widget.Toast;
 import com.google.gson.Gson;
 import com.jeffreyromero.materialestimator.R;
 import com.jeffreyromero.materialestimator.data.Deserializer;
-import com.jeffreyromero.materialestimator.data.ItemsDataSource;
+import com.jeffreyromero.materialestimator.data.ItemTypesSharedPreference;
 import com.jeffreyromero.materialestimator.models.BaseMaterial;
 import com.jeffreyromero.materialestimator.models.BaseItem;
-import com.jeffreyromero.materialestimator.utilities.SingleTextInputDialog;
 
 import java.util.Locale;
 
 /**
  * Displays an Item Type for editing.
  */
-public class ItemTypeFragment extends Fragment implements
+public class EditItemTypeFragment extends Fragment implements
         EditMaterialDialog.OnItemChangeListener {
 
+    private static final String TAG = "EditItemTypeFragment";
     private RecyclerView.Adapter adapter;
-    private ItemsDataSource itemsSP;
+    private ItemTypesSharedPreference itemsSP;
     private Context context;
     private BaseItem item;
 
-    public ItemTypeFragment() {
+    public EditItemTypeFragment() {
         // Required empty public constructor
     }
 
@@ -49,8 +48,8 @@ public class ItemTypeFragment extends Fragment implements
         this.context = context;
     }
 
-    public static ItemTypeFragment newInstance(BaseItem item) {
-        ItemTypeFragment fragment = new ItemTypeFragment();
+    public static EditItemTypeFragment newInstance(BaseItem item) {
+        EditItemTypeFragment fragment = new EditItemTypeFragment();
         //Serialize the material list.
         String json = new Gson().toJson(item);
         //Add it to the bundle.
@@ -61,16 +60,19 @@ public class ItemTypeFragment extends Fragment implements
         return fragment;
     }
 
+    public static String getTAG() {
+        return TAG;
+    }
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // Get the data from bundle and deserialize it.
         String json = getArguments().getString("item");
-        item = Deserializer.toItem(json);
+        item = Deserializer.toItemType(json);
         // Init project item shared preferences
-        itemsSP = new ItemsDataSource(
-                getString(R.string.items_key),
-                context
+        itemsSP = new ItemTypesSharedPreference(context,
+                getString(R.string.item_types_sp_file_name)
         );
         adapter = new RecyclerViewAdapter();
     }
@@ -110,7 +112,7 @@ public class ItemTypeFragment extends Fragment implements
             case R.id.action_add:
                 //Load add material dialog.
 //                AddMaterialDialog f = AddMaterialDialog.newInstance();
-//                f.setTargetFragment(ItemTypeFragment.this, 0);
+//                f.setTargetFragment(EditItemTypeFragment.this, 0);
 //                f.show(getActivity().getSupportFragmentManager(), f.getClass().getSimpleName());
                 return true;
             default:
@@ -131,7 +133,7 @@ public class ItemTypeFragment extends Fragment implements
         Toast.makeText(context, "Material updated", Toast.LENGTH_SHORT).show();
     }
 
-    //------------------------------- Adapter -------------------------------//
+    //------------------------------- ItemTypesListAdapter -------------------------------//
 
     public class RecyclerViewAdapter extends RecyclerView.Adapter {
 
@@ -178,7 +180,7 @@ public class ItemTypeFragment extends Fragment implements
                         EditMaterialDialog f = EditMaterialDialog
                                 .newInstance(clickedMaterial, getAdapterPosition());
                         // Set the target fragment for this dialog.
-                        f.setTargetFragment(ItemTypeFragment.this, 0);
+                        f.setTargetFragment(EditItemTypeFragment.this, 0);
                         f.show(getActivity().getSupportFragmentManager(), f.getClass().getSimpleName());
                     }
                 });

@@ -1,43 +1,41 @@
 package com.jeffreyromero.materialestimator.models;
 
-import android.text.format.DateFormat;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class Project {
-    private ArrayList<BaseItem> items;
-    private ArrayList<BaseMaterial> materialListFromItems;
-    private double totalPrice;
-    private String dateCreated;
-    private String location;
-    private String client;
     private String name;
+    private String dateCreated;
+    private ArrayList<BaseItem> items;
+//    private Map<String, Double> completeMaterialList;
+    // todo - Remove above from here. There is a copy in every project!!
+    // todo - Keep as a method on ProjectFragmentViews.
+    // todo - Change above class to ProjectFragmentViews and let it handle displaying list view and complete list view
 
     public Project(String name) {
-        this.items = new ArrayList<>();
-        this.dateCreated = setDateCreated();
         this.name = name;
+        this.dateCreated = setDateCreated();
+        this.items = new ArrayList<>();
+//        this.completeMaterialList = new LinkedHashMap<>();
     }
 
     public ArrayList<BaseItem> getItems() {
         return items;
     }
 
-    public void setItems(ArrayList<BaseItem> items) {
-        this.items = items;
-        builtMaterialListFromItems();
-    }
-
     public void addItem(BaseItem item){
         items.add(item);
-        builtMaterialListFromItems();
+//        builtCompleteMaterialListFromItems();
     }
 
     public void deleteItem(int position){
         items.remove(position);
-        builtMaterialListFromItems();
+//        builtCompleteMaterialListFromItems();
     }
 
     public String getName() {
@@ -52,8 +50,14 @@ public class Project {
         return dateCreated;
     }
 
-    public String setDateCreated() {
-        return DateFormat.format("dd-MM-yyyy", new java.util.Date()).toString();
+    private String setDateCreated() {
+        // Specify format
+        SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.US);
+        // Create Date object
+        Date now = new Date();
+        // Apply format
+        String dateFormatted = df.format(new Date());
+        return dateFormatted;
     }
 
     public double calcTotalPrice() {
@@ -62,58 +66,68 @@ public class Project {
         for (BaseItem pi : items) {
             total += pi.getTotalPrice();
         }
-        this.totalPrice = total;
         return total;
     }
 
-    public String getLocation() {
-        return location;
-    }
+//    public Map<String, Double> getCompleteMaterialList() {
+//        return completeMaterialList;
+//    }
 
-    public void setLocation(String location) {
-        this.location = location;
-    }
+//    private void builtCompleteMaterialListFromItems() {
 
-    public String getClient() {
-        return client;
-    }
+        //Flatten items into one list of material.
+//        ArrayList<BaseMaterial> flatList = new ArrayList<>();
+//        for (BaseItem item : this.getItems()) {
+//            MaterialList mList = item.getMaterialList();
+//            for (int i = 0; i < mList.size(); i++) {
+//                flatList.add(mList.get(i));
+//            }
+//        }
 
-    public void setClient(String client) {
-        this.client = client;
-    }
+        // Sum materials using LinkedHashMap
+//        Map<String, BaseMaterial> tempM = new LinkedHashMap<>();
+//        for (int i = 0; i < flatList.size(); i++) {
+//            String currentKey = flatList.get(i).getName();
+//            if (tempM.containsKey(currentKey)) {
+//                BaseMaterial sto = tempM.get(currentKey);
+//                BaseMaterial curr = flatList.get(i);
+//                double sum = sto.getQuantity() + curr.getQuantity();
+//                sto.setQuantity(555);
+//                tempM.put(currentKey, sto);
+//            } else {
+//                tempM.put(currentKey, flatList.get(i));
+//            }
+//        }
 
-    public ArrayList<BaseMaterial> getMaterialList() {
-        return materialListFromItems;
-    }
+        // Sum BaseMaterial using ArrayList by modifying the equals and hashcode in BaseMaterial
+//        ArrayList<BaseMaterial> newList = new ArrayList<>();
+//        for (int i = 0; i < flatList.size(); i++) {
+//            BaseMaterial currentMaterial = flatList.get(i);
+//            if (newList.contains(currentMaterial)) {
+//                BaseMaterial stored = newList.get(newList.indexOf(currentMaterial));
+//                double sum = stored.getQuantity() + currentMaterial.getQuantity();
+//                stored.setQuantity(sum);
+//            } else {
+//                newList.add(currentMaterial);
+//            }
+//        }
 
-    private void builtMaterialListFromItems() {
+        // Both of the above methods did not work as it modified the same objects.
+        // Create a new map of primitives derived from summing the fields from the BaseMaterials
+//        completeMaterialList.clear();
+//        for (int i = 0; i < flatList.size(); i++) {
+//            String currentKey = flatList.get(i).getName();
+//            if (completeMaterialList.containsKey(currentKey)) {
+//                Double storedQuantity = completeMaterialList.get(currentKey);
+//                Double currentQuantity = flatList.get(i).getQuantity();
+//                double sum = storedQuantity + currentQuantity;
+//                completeMaterialList.put(currentKey, sum);
+//            } else {
+//                completeMaterialList.put(currentKey, flatList.get(i).getQuantity());
+//            }
+//        }
 
-        //Create a flat list containing all materials from each BaseItem.
-        ArrayList<BaseMaterial> flatList = new ArrayList<>();
-        for (BaseItem pi : this.getItems()) {
-            MaterialList mList = pi.getMaterialList();
-            for (int i = 0; i < mList.size(); i++) {
-                flatList.add(mList.get(i));
-            }
-        }
-
-        //Create a map while summing the quantities of materials with the same name.
-        Map<String, BaseMaterial> map = new LinkedHashMap<>();
-        for (int i = 0; i < flatList.size(); i++) {
-            String currentKey = flatList.get(i).getName();
-            if (map.containsKey(currentKey)) {
-                BaseMaterial stored = map.get(currentKey);
-                BaseMaterial current = flatList.get(i);
-                double sum = stored.getQuantity() + current.getQuantity();
-                stored.setQuantity(sum);
-                map.put(currentKey, stored);
-            } else {
-                map.put(currentKey, flatList.get(i));
-            }
-        }
-
-        this.materialListFromItems = new ArrayList<>(map.values());
-    }
+//    }
 
     @Override
     public String toString() {

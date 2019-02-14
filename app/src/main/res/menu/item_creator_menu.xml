@@ -3,13 +3,13 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item android:id="@+id/action_save"
+        android:icon="@drawable/ic_save"
         android:title="@string/action_save"
-        android:icon="@drawable/ic_check_white_24dp"
-        app:showAsAction="ifRoom|withText" />
+        app:showAsAction="ifRoom" />
 
-    <item android:id="@+id/action_settings"
-        android:title="@string/action_settings"
-        android:icon="@drawable/ic_settings_white_24dp"
+    <item android:id="@+id/action_material_settings"
+        android:title="@string/action_material_settings"
+        android:icon="@drawable/ic_settings"
         app:showAsAction="never" />
 
     <item android:id="@+id/action_help"

@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3f51b5</color>
+    <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303f9f</color>
-    <color name="colorAccent">#ff4081</color>
-    <color name="white">#ffffff</color>
-    <color name="lightGray">#EEEEEE</color>
+    <color name="colorAccent">#FF4081</color>
 
-    <!--Used for list baseItem background transition effects-->
+    <color name="colorWhite">#ffffff</color>
+    <color name="colorBlack">#191919</color>
+    <color name="colorLightGray">#f1f1f1</color>
+
+    <!--Drawables used for list baseItem background transition effects-->
     <drawable name="white">#ffffff</drawable>
     <drawable name="lightBlue">#c6cdf1</drawable>
 </resources>

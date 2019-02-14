@@ -12,7 +12,8 @@
         android:id="@+id/radioBTN"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="16sp"
+        android:layout_marginStart="2dp"
+        android:textSize="14sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -20,7 +21,7 @@
         android:id="@+id/toolbarTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="12dp"
         android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="@+id/radioBTN"
         app:layout_constraintStart_toEndOf="@+id/radioBTN"

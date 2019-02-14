@@ -18,8 +18,7 @@ import com.jeffreyromero.materialestimator.R;
 
 
 /**
- * Displays a dialog to create a new project and passes
- * the name and description back to the hosting fragment.
+ * Example dialog
  */
 public class dialog extends DialogFragment {
 
@@ -65,7 +64,7 @@ public class dialog extends DialogFragment {
             public void onClick(DialogInterface dialog, int which) {
 
                 //Get user input.
-                EditText nameET = dialogView.findViewById(R.id.nameET);
+                EditText nameET = dialogView.findViewById(R.id.projectNameET);
                 String name = nameET.getText().toString();
 
                 //Inform the listener of the new ic_project created.

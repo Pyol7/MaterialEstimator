@@ -1,65 +1,58 @@
 package com.jeffreyromero.materialestimator;
 
-import android.content.Context;
-import android.graphics.PorterDuff;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.res.ResourcesCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.preference.PreferenceManager;
-import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.TextView;
 
-import com.jeffreyromero.materialestimator.Item.ItemTypeFragment;
+import com.jeffreyromero.materialestimator.Item.EditItemTypeFragment;
 import com.jeffreyromero.materialestimator.Item.ItemTypesFragment;
-import com.jeffreyromero.materialestimator.data.ItemsDataSource;
+import com.jeffreyromero.materialestimator.data.ItemTypesSharedPreference;
+import com.jeffreyromero.materialestimator.data.ProjectsSharedPreference;
 import com.jeffreyromero.materialestimator.models.BaseItem;
+import com.jeffreyromero.materialestimator.models.ItemTypes.DroppedCeiling;
+import com.jeffreyromero.materialestimator.models.ItemTypes.DrywallCeiling;
+import com.jeffreyromero.materialestimator.models.ItemTypes.DrywallPartition;
 import com.jeffreyromero.materialestimator.models.Project;
-import com.jeffreyromero.materialestimator.models.Items.DroppedCeiling;
-import com.jeffreyromero.materialestimator.models.Items.DrywallCeiling;
-import com.jeffreyromero.materialestimator.models.Items.DrywallPartition;
-import com.jeffreyromero.materialestimator.project.ProjectFragment;
-import com.jeffreyromero.materialestimator.project.ItemFragment;
-import com.jeffreyromero.materialestimator.project.ProjectsFragment;
+import com.jeffreyromero.materialestimator.projectFragments.ItemFragment;
+import com.jeffreyromero.materialestimator.projectFragments.ProjectFragment;
+import com.jeffreyromero.materialestimator.projectFragments.ProjectsFragment;
 import com.jeffreyromero.materialestimator.utilities.Helper;
+import com.jeffreyromero.materialestimator.utilities.dialogCreateNewItem.DialogSelectItemType;
 
-import static android.view.Gravity.CENTER_VERTICAL;
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements
         NavigationView.OnNavigationItemSelectedListener,
         ProjectsFragment.OnItemClickListener,
         ProjectFragment.OnItemClickListener,
-        ItemTypesFragment.OnItemClickListener{
+        ItemTypesFragment.OnItemClickListener {
 
     private DrawerLayout drawerLayout;
+
+    private ProjectsSharedPreference projectsSharedPreference;
+    private ItemTypesSharedPreference itemTypesSharedPreference;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
 
-        // Get the drawer layout
-        drawerLayout = findViewById(R.id.drawer_layout);
+        // Setup data sources
+        projectsSharedPreference = new ProjectsSharedPreference(this, getResources().getString(R.string.projects_sp_file_name));
+        itemTypesSharedPreference = new ItemTypesSharedPreference(this, getResources().getString(R.string.item_types_sp_file_name));
 
-        // Setup drawer navigation
-        NavigationView navigationView = findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
-
-        // Store default project items
-        storeDefaultProjectItemsToSharedPreferences(this.getApplicationContext());
+        storeItemTypesToSharedPreferences();
 
         // todo - use for general settings
         PreferenceManager.setDefaultValues(this, R.xml.project_item_creator_settings, false);
 
-        // Display Projects fragment.
+        // Load ProjectsFragment fragment.
         if (findViewById(R.id.fragment_container) != null) {
             // To avoid overlapping fragments.
             if (savedInstanceState != null) {
@@ -67,8 +60,18 @@ public class MainActivity extends AppCompatActivity implements
             }
             // Note that the first fragment is not added to the back stack
             // therefore clearing the back stack would always reveal it
-            Helper.addFragment(this, ProjectsFragment.newInstance(), false);
+            Helper.addFragment(this,
+                    ProjectsFragment.newInstance(projectsSharedPreference.getAll()),
+                    R.id.fragment_container,
+                    false
+            );
         }
+
+        // Setup drawer navigation
+        drawerLayout = findViewById(R.id.drawer_layout);
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+
     }
 
     /**
@@ -88,6 +91,7 @@ public class MainActivity extends AppCompatActivity implements
                 Helper.replaceFragment(
                         this,
                         ItemTypesFragment.newInstance(),
+                        R.id.fragment_container,
                         true
                 );
                 break;
@@ -105,9 +109,9 @@ public class MainActivity extends AppCompatActivity implements
     public void enableDrawerNavigation(Boolean enabled){
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         if (enabled){
-            getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu_white_24dp);
+            getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu);
         } else {
-            getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_arrow_back_white_24dp);
+            getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_arrow_back);
         }
     }
 
@@ -135,32 +139,72 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    private void storeDefaultProjectItemsToSharedPreferences(Context context) {
-        ItemsDataSource itemsSP = new ItemsDataSource(getString(R.string.items_key), context);
+    /**
+     * Creates the list of item types that would be used to create new items.
+     * The list is refreshed every time MainActivity is called.
+     */
+    private void storeItemTypesToSharedPreferences() {
+        itemTypesSharedPreference.clearAll();
+        itemTypesSharedPreference.put("dropped_ceiling", new DroppedCeiling("Untitled"));
+        itemTypesSharedPreference.put("drywall_ceiling", new DrywallCeiling("Untitled"));
+        itemTypesSharedPreference.put("drywall_partition", new DrywallPartition("Untitled"));
+    }
 
-        if (itemsSP.isEmpty()) {
-            itemsSP.put("Dropped Ceiling", new DroppedCeiling(getString(R.string.untitled)));
-            itemsSP.put("Drywall Ceiling", new DrywallCeiling(getString(R.string.untitled)));
-            itemsSP.put("Drywall Partition", new DrywallPartition(getString(R.string.untitled)));
-        }
+    // ------------------------------ ProjectsFragment ----------------------------------- //
+
+    @Override
+    public void onProjectsFragmentLoadProjectRequest(Project project) {
+        Helper.replaceFragment(this,
+                ProjectFragment.newInstance(project),
+                R.id.fragment_container,
+                true
+        );
     }
 
     @Override
-    public void onProjectsFragmentItemClick(Project project) {
-        // Show the clicked project
-        Helper.replaceFragment(this, ProjectFragment.newInstance(project),true);
+    public ArrayList<Project> onProjectsFragmentAddProjectRequest(Project project) {
+        return projectsSharedPreference.put(project.getName(), project);
     }
+
+    @Override
+    public ArrayList<Project> onProjectsFragmentDeleteProjectRequest(String key) {
+        return projectsSharedPreference.remove(key);
+    }
+
+    // ------------------------------ ProjectFragment ----------------------------------- //
 
     @Override
     public void onProjectFragmentItemClick(BaseItem item) {
-        // Show the clicked item
-        Helper.replaceFragment(this, ItemFragment.newInstance(item),true);
+        Helper.replaceFragment(this,
+                ItemFragment.newInstance(item),
+                R.id.fragment_container,
+                true
+        );
     }
 
     @Override
+    public void onProjectFragmentCreateNewItemBtnClick() {
+        // Get target fragment
+        Fragment targetFragment = getSupportFragmentManager().findFragmentByTag(
+                "com.jeffreyromero.materialestimator.projectFragments.ProjectFragment"
+        );
+        Helper.replaceFragment(this,
+                DialogSelectItemType.newInstance(itemTypesSharedPreference.getAll()),
+                targetFragment,
+                R.id.project_fragment_container,
+                true
+        );
+    }
+
+    // ------------------------------ ItemTypesFragment ----------------------------------- //
+
+    @Override
     public void onItemTypesFragmentItemClick(BaseItem itemType) {
-        // Show the clicked item type
-        Helper.replaceFragment(this, ItemTypeFragment.newInstance(itemType),true);
+        Helper.replaceFragment(this,
+                EditItemTypeFragment.newInstance(itemType),
+                R.id.fragment_container,
+                true
+        );
     }
 
 }

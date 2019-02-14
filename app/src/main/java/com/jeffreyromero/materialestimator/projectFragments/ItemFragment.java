@@ -1,4 +1,4 @@
-package com.jeffreyromero.materialestimator.project;
+package com.jeffreyromero.materialestimator.projectFragments;
 
 
 import android.os.Bundle;
@@ -12,7 +12,6 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
-import com.jeffreyromero.materialestimator.MainActivity;
 import com.jeffreyromero.materialestimator.R;
 import com.jeffreyromero.materialestimator.data.Deserializer;
 import com.jeffreyromero.materialestimator.models.BaseItem;
@@ -46,7 +45,7 @@ public class ItemFragment extends Fragment {
         //Set all fields.
         if (getArguments() != null) {
             String json = getArguments().getString(PROJECT_ITEM);
-            baseItem = Deserializer.toItem(json);
+            baseItem = Deserializer.toItemType(json);
         }
     }
 

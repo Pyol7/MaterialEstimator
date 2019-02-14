@@ -13,7 +13,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.SeekBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
@@ -102,7 +101,7 @@ public class EditMaterialDialog extends DialogFragment {
 
         //todo - input validation for all
         // Get individual views
-        nameET = dialogView.findViewById(R.id.nameET);
+        nameET = dialogView.findViewById(R.id.projectNameET);
         unitPriceET = dialogView.findViewById(R.id.unitPriceET);
         // Add a text change listener to detect when a value of -1 (or -1.0) is set.
         // Which indicates that a field is not used therefore should be hidden.

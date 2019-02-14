@@ -6,9 +6,9 @@ import com.google.gson.reflect.TypeToken;
 import com.jeffreyromero.materialestimator.models.BaseItem;
 import com.jeffreyromero.materialestimator.models.BaseMaterial;
 import com.jeffreyromero.materialestimator.models.Project;
-import com.jeffreyromero.materialestimator.models.Items.DroppedCeiling;
-import com.jeffreyromero.materialestimator.models.Items.DrywallCeiling;
-import com.jeffreyromero.materialestimator.models.Items.DrywallPartition;
+import com.jeffreyromero.materialestimator.models.ItemTypes.DroppedCeiling;
+import com.jeffreyromero.materialestimator.models.ItemTypes.DrywallCeiling;
+import com.jeffreyromero.materialestimator.models.ItemTypes.DrywallPartition;
 import com.jeffreyromero.materialestimator.models.quantifiables.CeilingTile;
 import com.jeffreyromero.materialestimator.models.quantifiables.Tee;
 import com.jeffreyromero.materialestimator.models.non_quantifiables.MainSupportFastener;
@@ -81,7 +81,7 @@ public class Deserializer {
                 .create();
     }
 
-    public static ArrayList<MaterialList> toArrayListOfMaterialList(String json) {
+    public static ArrayList<MaterialList> toMaterialLists(String json) {
         Type type = new TypeToken<ArrayList<MaterialList>>(){}.getType();
         return gson.fromJson(json, type);
     }
@@ -103,11 +103,11 @@ public class Deserializer {
         return gson.fromJson(json, Project.class);
     }
 
-    public static BaseItem toItem(String json) {
+    public static BaseItem toItemType(String json) {
         return gson.fromJson(json, BaseItem.class);
     }
 
-    public static ArrayList<BaseItem> toListOfItems(String json) {
+    public static ArrayList<BaseItem> toItemTypes(String json) {
         Type type = new TypeToken<ArrayList<BaseItem>>(){}.getType();
         return gson.fromJson(json, type);
     }

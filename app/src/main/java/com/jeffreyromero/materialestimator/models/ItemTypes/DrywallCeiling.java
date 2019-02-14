@@ -1,4 +1,4 @@
-package com.jeffreyromero.materialestimator.models.Items;
+package com.jeffreyromero.materialestimator.models.ItemTypes;
 
 import com.jeffreyromero.materialestimator.models.BaseItem;
 import com.jeffreyromero.materialestimator.models.BaseMaterial;
@@ -19,8 +19,7 @@ import java.util.List;
 
 public class DrywallCeiling extends BaseItem {
 
-    private static final String LENGTH = "Length";
-    private static final String WIDTH = "Width";
+    private int layersOfBoards;
 
     public DrywallCeiling(String name) {
         super("Drywall Ceiling", name);
@@ -39,14 +38,14 @@ public class DrywallCeiling extends BaseItem {
         list.add(new Panel("Ultra Light Boards", 74.00, 96, 48));
         list.add(new PanelFastener("Drywall Screws", 0.20, 16));
         list.add(new JointCompound("Joint Compound All Purpose", 130.00,50400));
-        return new MaterialList(list, generateNameFromClassName());
+        return new MaterialList(list, buildMaterialListNameFromClassName());
     }
 
     @Override
-    public void calcQuantities(double x, double y){
+    public void calcQuantities(){
         // Analyse dimensions
-        double length = Math.max(x, y);
-        double width = Math.min(x, y);
+        double length = Math.max(getLength(), getWidth());
+        double width = Math.min(getLength(), getWidth());
         setLength(length);
         setWidth(width);
         // Calculate quantities
@@ -83,11 +82,11 @@ public class DrywallCeiling extends BaseItem {
         ml.setList(tempList);
     }
 
-    public String getXHintText(){
-        return LENGTH;
+    public int getLayersOfBoards() {
+        return layersOfBoards;
     }
 
-    public String getYHintText(){
-        return WIDTH;
+    public void setLayersOfBoards(int layersOfBoards) {
+        this.layersOfBoards = layersOfBoards;
     }
 }

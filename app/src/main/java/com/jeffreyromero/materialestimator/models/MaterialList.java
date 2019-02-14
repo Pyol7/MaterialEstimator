@@ -1,23 +1,14 @@
 package com.jeffreyromero.materialestimator.models;
 
-import android.text.format.DateFormat;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MaterialList{
     private List<BaseMaterial> materialList;
-    private String dateCreated;
     private String name;
 
-    public MaterialList(String name) {
-        this.materialList = new ArrayList<>();
-        this.dateCreated = setDateCreated();
-        this.name = name;
-    }
-
     public MaterialList(List<BaseMaterial> materialList, String name) {
-        this.dateCreated = setDateCreated();
         this.materialList = materialList;
         this.name = name;
     }
@@ -73,14 +64,6 @@ public class MaterialList{
 
     public int size() {
         return materialList.size();
-    }
-
-    public String getDateCreated() {
-        return dateCreated;
-    }
-
-    public String setDateCreated() {
-        return DateFormat.format("dd-MM-yyyy", new java.util.Date()).toString();
     }
 
     public List<String> listToString(){

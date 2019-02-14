@@ -16,25 +16,23 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.google.gson.Gson;
-import com.jeffreyromero.materialestimator.MainActivity;
 import com.jeffreyromero.materialestimator.R;
-import com.jeffreyromero.materialestimator.data.Deserializer;
-import com.jeffreyromero.materialestimator.data.ItemsDataSource;
+import com.jeffreyromero.materialestimator.data.ItemTypesSharedPreference;
 import com.jeffreyromero.materialestimator.models.BaseItem;
 
 import java.util.ArrayList;
 
 /**
- * Displays a list of all the stored ItemTypes
+ * Displays a list of all the stored ItemTypes.
  * Returns the clicked ItemType to the Listener.
  */
 public class ItemTypesFragment extends Fragment {
 
+    private static final String TAG = "ItemTypesFragment";
     private OnItemClickListener mListener;
     private RecyclerView.Adapter adapter;
     private ArrayList<BaseItem> items;
-    private ItemsDataSource itemsSP;
+    private ItemTypesSharedPreference itemsSP;
     private Context context;
 
     public ItemTypesFragment() {
@@ -49,10 +47,16 @@ public class ItemTypesFragment extends Fragment {
         return new ItemTypesFragment();
     }
 
+    public static String getTAG() {
+        return TAG;
+    }
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
         this.context = context;
+        // Ensure that there is a listener and it implements the callback(s).
+        // In this case MainActivity is the listener so we can cast from context.
         if (context instanceof OnItemClickListener) {
             mListener = (OnItemClickListener) context;
         } else {
@@ -65,7 +69,7 @@ public class ItemTypesFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // Init item shared preferences
-        itemsSP = new ItemsDataSource(getString(R.string.items_key), context);
+        itemsSP = new ItemTypesSharedPreference(context, getString(R.string.item_types_sp_file_name));
         items = itemsSP.getAll();
         adapter = new Adapter();
     }
@@ -127,7 +131,7 @@ public class ItemTypesFragment extends Fragment {
         if (id == R.id.action_add) {
 
             // Respond to the add (+) menu item with adding a new list.
-            // This is done by the listener (ItemTypeActivity).
+            // This is done by the listener (ItemTypesActivity).
 //            mListener.onAddNewListButtonClick();
 
             return true;
@@ -159,7 +163,7 @@ public class ItemTypesFragment extends Fragment {
             BaseItem baseItem = items.get(position);
             itemViewHolder viewHolder = (itemViewHolder) holder;
             viewHolder.columnLeftTV.setText(baseItem.getSubType());
-            viewHolder.columnRightTV.setText(baseItem.getCreatedBy());
+            viewHolder.columnRightTV.setText("Created by");
         }
 
 

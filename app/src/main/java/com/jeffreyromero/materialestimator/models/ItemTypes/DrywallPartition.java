@@ -1,8 +1,9 @@
-package com.jeffreyromero.materialestimator.models.Items;
+package com.jeffreyromero.materialestimator.models.ItemTypes;
 
 import com.jeffreyromero.materialestimator.models.BaseItem;
 import com.jeffreyromero.materialestimator.models.BaseMaterial;
 import com.jeffreyromero.materialestimator.models.MaterialList;
+import com.jeffreyromero.materialestimator.models.Quantifiable;
 import com.jeffreyromero.materialestimator.models.non_quantifiables.PanelFastener;
 import com.jeffreyromero.materialestimator.models.quantifiables.TrackFastener;
 import com.jeffreyromero.materialestimator.models.quantifiables.JointCompound;
@@ -15,8 +16,8 @@ import java.util.List;
 
 public class DrywallPartition extends BaseItem {
 
-    private static final String LENGTH = "Length";
-    private static final String HEIGHT = "Height";
+    private int layersOfBoards;
+    private double totalOpeningArea;
 
     public DrywallPartition(String name) {
         super("Drywall Partition", name);
@@ -34,30 +35,28 @@ public class DrywallPartition extends BaseItem {
         list.add(new PanelFastener("Drywall Screws for Panels",0.20, 16));
 //        list.add(new FramingFastener("Framing Screws for studs",0.14));
         list.add(new JointCompound("Joint Compound All Purpose",130.00,50400));
-        return new MaterialList(list, generateNameFromClassName());
+        return new MaterialList(list, buildMaterialListNameFromClassName());
     }
 
     @Override
-    public void calcQuantities(double x, double y){
+    public void calcQuantities(){
         // Analyse dimensions
-        double length = x;
-        double height = y;
-        setLength(length);
-        setHeight(height);
+        double length = getLength();
+        double height = getHeight();
         List<BaseMaterial> tempList = new ArrayList<>();
         MaterialList ml = getMaterialList();
         for (BaseMaterial bm : ml.getList()){
             // Handle materials that do not implement Quantifiable
-//            if (bm instanceof PanelFastener){
-//                PanelFastener panelFastener = (PanelFastener) bm;
-//                panelFastener.calcFastenerQuantity(
-//                        length,
-//                        height,
-//                        ml.get(Panel.class),
-//                        ml.get(Stud.class)
-//                );
-//                tempList.add(panelFastener);
-//
+            if (bm instanceof PanelFastener){
+                PanelFastener panelFastener = (PanelFastener) bm;
+                panelFastener.calcFastenerQuantity(
+                        length,
+                        height,
+                        ml.get(Panel.class),
+                        ml.get(Stud.class)
+                );
+                tempList.add(panelFastener);
+
 //            } else if (bm instanceof FramingFastener) {
 //                FramingFastener framingFastener = (FramingFastener) bm;
 //                framingFastener.calcFastenerQuantity(
@@ -66,24 +65,30 @@ public class DrywallPartition extends BaseItem {
 //                        ml.get(Stud.class)
 //                );
 //                tempList.add(framingFastener);
-//
-//            } else {
-//                // Handle materials that implements Quantifiable
-//                ((Quantifiable)bm).calcQuantity(length, height);
-//                tempList.add(bm);
-//            }
+
+            } else {
+                // Handle materials that implements Quantifiable
+                ((Quantifiable)bm).calcQuantity(length, height);
+                tempList.add(bm);
+            }
         }
         // Update materialList
         ml.setList(tempList);
     }
 
-    @Override
-    public String getXHintText() {
-        return LENGTH;
+    public int getLayersOfBoards() {
+        return layersOfBoards;
     }
 
-    @Override
-    public String getYHintText() {
-        return HEIGHT;
+    public void setLayersOfBoards(int layerOfBoards) {
+        this.layersOfBoards = layerOfBoards;
+    }
+
+    public double getTotalOpeningArea() {
+        return totalOpeningArea;
+    }
+
+    public void setTotalOpeningArea(double totalOpeningArea) {
+        this.totalOpeningArea = totalOpeningArea;
     }
 }

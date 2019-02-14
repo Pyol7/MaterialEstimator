@@ -5,7 +5,7 @@
     android:id="@+id/toolbar"
     android:layout_width="match_parent"
     android:layout_height="68dp"
-    android:background="@color/colorAccent"
+    android:background="@color/colorPrimary"
     android:minHeight="198dp"
     app:contentInsetStartWithNavigation="0dp"
     app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
@@ -24,7 +24,7 @@
             android:paddingTop="9dp"
             android:paddingBottom="4dp"
             android:singleLine="true"
-            android:textColor="@color/white"
+            android:textColor="@color/colorWhite"
             android:textSize="18sp"
             tools:text="Master Bedroom Ceiling" />
 
@@ -34,7 +34,7 @@
             android:layout_height="wrap_content"
             android:focusable="auto"
             android:singleLine="true"
-            android:textColor="@color/white"
+            android:textColor="@color/colorWhite"
             android:textSize="16sp"
             tools:layout_editor_absoluteX="147dp"
             tools:layout_editor_absoluteY="32dp"

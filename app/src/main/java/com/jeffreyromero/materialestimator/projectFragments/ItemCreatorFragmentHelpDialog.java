@@ -1,4 +1,4 @@
-package com.jeffreyromero.materialestimator.project;
+package com.jeffreyromero.materialestimator.projectFragments;
 
 import android.app.Dialog;
 import android.content.Context;

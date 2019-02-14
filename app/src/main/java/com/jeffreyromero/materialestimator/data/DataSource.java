@@ -2,6 +2,9 @@ package com.jeffreyromero.materialestimator.data;
 
 import android.content.SharedPreferences;
 
+import com.jeffreyromero.materialestimator.models.Project;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -25,13 +28,13 @@ public interface DataSource<String, T> {
     boolean contains(String key);
 
     /**
-     * Stores an Object using it's <em>property</em> property as key.
+     * Stores an Object using it's <em>name</em> property as key
+     *  and return the new list of objects.
      * If the key exists the Object would be overwritten by the Object provided.
-     *
-     * @param key   The key to use to store the Object.
+     *  @param key   The key to use to store the Object.
      * @param t     The Object to store.
      */
-    void put(String key, T t);
+    ArrayList<T> put(String key, T t);
 
     /**
      * Get the Object with a particular key.
@@ -48,12 +51,12 @@ public interface DataSource<String, T> {
     /**
      * Get all stored Objects.
      */
-    List<T> getAll();
+    ArrayList<T> getAll();
 
     /**
      * Get all stored objects as a Map<String, Object>.
      */
-    Map<String,T> getAllAsMap();
+    Map<String, ?> getAllAsMap();
 
     /**
      * Get a list of all the keys.
@@ -68,10 +71,10 @@ public interface DataSource<String, T> {
     void replace(String key, T t);
 
     /**
-     * Delete an Object.
+     * Delete an Object and return the new list of objects.
      * @param key Key of object to delete.
      */
-    void remove(String key);
+    ArrayList<T> remove(String key);
 
     /**
      * Delete all Objects.

@@ -1,5 +1,7 @@
 package com.jeffreyromero.materialestimator.models;
 
+import java.util.Objects;
+
 /**
  * The subType field is used by Gson to identify subTypes for deserialization.
  * All subTypes must use their class name for the subType field and must be registered with
@@ -147,4 +149,17 @@ public abstract class BaseMaterial{
         return name;
     }
 
+    // BaseMaterials are equal if their name and subtype are the same
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BaseMaterial that = (BaseMaterial) o;
+        return Objects.equals(name, that.name) && Objects.equals(subType, that.subType);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name,subType);
+    }
 }

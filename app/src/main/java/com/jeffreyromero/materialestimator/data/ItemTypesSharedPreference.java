@@ -4,19 +4,22 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.google.gson.Gson;
-import com.jeffreyromero.materialestimator.R;
+import com.jeffreyromero.materialestimator.models.BaseItem;
 import com.jeffreyromero.materialestimator.models.Project;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class ProjectsDataSource implements DataSource<String, Project> {
+public class ItemTypesSharedPreference implements DataSource<String, BaseItem> {
 
     private SharedPreferences spInstance;
 
-    public ProjectsDataSource(String sharedPreferencesFileName, Context context) {
+    public ItemTypesSharedPreference(Context context, String sharedPreferencesFileName) {
         this.spInstance = context.getSharedPreferences(
                 sharedPreferencesFileName,
                 0
@@ -35,66 +38,64 @@ public class ProjectsDataSource implements DataSource<String, Project> {
     }
 
     /**
-     * Stores an Object using it's <em>name</em> property as key.
+     * Stores an Object using it's <em>subType</em> property as key.
      * If the key exists the Object would be overwritten by the Object provided.
-     *
-     * @param key     The key to use to store the Object.
-     * @param project The Object to store.
+     *  @param key         The key to use to store the Object.
+     * @param baseItem The Object to store.
      */
     @Override
-    public void put(String key, Project project) {
+    public ArrayList<BaseItem> put(String key, BaseItem baseItem) {
         SharedPreferences.Editor editor = spInstance.edit();
-        String json = new Gson().toJson(project);
-        editor.putString(project.getName(), json);
+        String json = new Gson().toJson(baseItem);
+        editor.putString(key, json);
         editor.commit();
+        return getAll();
     }
 
     @Override
-    public Project get(String key) {
+    public BaseItem get(String key) {
         String json = spInstance.getString(key, null);
-        return Deserializer.toProject(json);
+        return Deserializer.toItemType(json);
     }
 
     @Override
-    public Project get(int position) {
-        ArrayList<Project> projects = getAll();
-        return projects.get(position);
+    public BaseItem get(int position) {
+        ArrayList<BaseItem> allBaseItems = getAll();
+        return allBaseItems.get(position);
     }
 
     @Override
-    public ArrayList<Project> getAll() {
-        return new ArrayList<>(getAllAsMap().values());
-    }
-
-    @Override
-    public Map<String, Project> getAllAsMap() {
-        Map<String, Project> newMap = new HashMap<>();
-        Map<String, ?> map = spInstance.getAll();
-        Set<String> keys = map.keySet();
-        for (String key: keys){
-            newMap.put(key, get(key));
+    public ArrayList<BaseItem> getAll() {
+        List<?> unSortedStrings = new ArrayList<>(spInstance.getAll().values());
+        // Convert values to Project objects
+        ArrayList<BaseItem> itemTypes = new ArrayList<>();
+        for (Object i: unSortedStrings){
+            BaseItem itemType = Deserializer.toItemType(i.toString());
+            itemTypes.add(itemType);
         }
-        return newMap;
+        return itemTypes;
+    }
+
+    @Override
+    public Map<String, ?> getAllAsMap() {
+        return spInstance.getAll();
     }
 
     @Override
     public ArrayList<String> getAllKeys() {
-        Map<String, ?> map = spInstance.getAll();
-        if (map != null) {
-            return new ArrayList<>(map.keySet());
-        }
-        return null;
+        return new ArrayList<>(getAllAsMap().keySet());
     }
 
     @Override
-    public void replace(String key, Project project) {
-        put(key, project);
+    public void replace(String key, BaseItem baseItem) {
+        put(key, baseItem);
     }
 
     @Override
-    public void remove(String key) {
+    public ArrayList<BaseItem> remove(String key) {
         SharedPreferences.Editor editor = spInstance.edit();
         editor.remove(key).commit();
+        return getAll();
     }
 
     @Override
